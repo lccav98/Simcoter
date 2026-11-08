@@ -18,10 +18,10 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [ ] Replay e APA básica (APA descritiva inicial implementada; replay pendente)
 
 ## M2 — Biblioteca e IA local
-- [ ] Catálogo doutrinário com fonte/edição/permissões
+- [x] Catálogo inicial de metadados com verificação de fonte/edição ainda pendente
 - [ ] Recuperação textual/semântica offline
 - [ ] Ollama opcional com respostas verificáveis
-- [ ] Gerador contextual com schema e validador independente
+- [ ] Gerador contextual com schema e validador independente (propostas por regras objetivas já implementadas; validação de IA ainda pendente)
 - [ ] Testes contra contradições de cenário e citações falsas
 
 ## M3 — Estado-Maior multijogador
