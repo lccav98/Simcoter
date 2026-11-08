@@ -12,6 +12,7 @@ from pathlib import Path
 from .probability import sample_transition, forecast
 from .access import issue_credentials, fingerprint, verify_fingerprint
 from .virtual_staff import create_proposal, coordinate, AGENTS
+from .readiness import unit_state, apply_training_variation, READINESS_VERSION, can_participate
 
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
@@ -21,9 +22,9 @@ TEACHING_EVENTS = [
     ("Demanda adicional de atendimento em exercício", "saude", 3),
 ]
 UNITS = [
-    {"id": "azul-1", "party": "azul", "name": "Unidade fictícia Azul 1", "x": 23, "y": 36, "kind": "infantry", "echelon": "battalion"},
-    {"id": "azul-2", "party": "azul", "name": "Unidade fictícia Azul 2", "x": 32, "y": 73, "kind": "logistics", "echelon": "company"},
-    {"id": "vermelha-1", "party": "vermelha", "name": "Unidade fictícia Vermelha 1", "x": 78, "y": 44, "kind": "command", "echelon": "brigade"},
+    {"id": "azul-1", "party": "azul", "name": "Unidade fictícia Azul 1", "x": 23, "y": 36, "kind": "infantry", "echelon": "battalion", "readiness": 84},
+    {"id": "azul-2", "party": "azul", "name": "Unidade fictícia Azul 2", "x": 32, "y": 73, "kind": "logistics", "echelon": "company", "readiness": 65},
+    {"id": "vermelha-1", "party": "vermelha", "name": "Unidade fictícia Vermelha 1", "x": 78, "y": 44, "kind": "command", "echelon": "brigade", "readiness": 92},
 ]
 FEATURES = [
     {"id": "area-azul", "name": "Área de responsabilidade Azul", "kind": "area", "status": "proposed"},
@@ -66,7 +67,9 @@ class GameStore:
         row = db.execute("SELECT state FROM sessions WHERE id=?", (session_id,)).fetchone()
         if row is None:
             raise KeyError("Partida não encontrada")
-        return json.loads(row[0])
+        state = json.loads(row[0])
+        state["units"] = unit_state(state["units"])
+        return state
 
     def create(self, title: str = "Exercício Horizonte", seed: int = 2026) -> dict:
         if not -2**31 <= seed < 2**31:
@@ -74,7 +77,7 @@ class GameStore:
         state = {
             "id": str(uuid.uuid4()), "title": title.strip() or "Exercício Horizonte",
             "seed": seed, "turn": 0, "resources": INITIAL_RESOURCES.copy(),
-            "units": UNITS, "features": [item.copy() for item in FEATURES],
+            "units": unit_state(UNITS), "features": [item.copy() for item in FEATURES],
             "reports": [], "events": [], "staff_tasks": [], "created_at": utc_now(),
             "scenario": "Território, organizações e parâmetros inteiramente fictícios.",
         }
@@ -153,6 +156,45 @@ class GameStore:
             self._save(db, state)
         return state
 
+    def unit_readiness(self, session_id: str, unit_id: str, change: int) -> dict:
+        """Ajuste pedagógico manual por instrutor; não modela engajamentos."""
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            unit = next((u for u in state["units"] if u["id"] == unit_id), None)
+            if unit is None:
+                raise KeyError("Unidade inexistente")
+            before = unit["readiness"]
+            updated = apply_training_variation(unit, change)
+            unit.update(updated)
+            state["events"].append({
+                "kind": "readiness_review", "turn": state["turn"],
+                "unit_id": unit_id, "before": before,
+                "after": updated["readiness"], "rule": READINESS_VERSION,
+                "available_for_simulated_actions": can_participate(updated),
+                "cause": "Ajuste de prontidão fictícia pelo instrutor",
+            })
+            if before > 25 and not can_participate(updated):
+                state["events"].append({
+                    "kind": "unit_unavailable", "turn": state["turn"],
+                    "unit_id": unit_id, "rule": READINESS_VERSION,
+                    "cause": "Indicador didático atingiu o limite de indisponibilidade",
+                })
+            self._save(db, state)
+        return state
+
+    def validate_unit_action(self, session_id: str, unit_id: str) -> dict:
+        """Bloqueio verificável para futuras ações simuladas, sem executá-las."""
+        state = self.get(session_id)
+        unit = next((u for u in state["units"] if u["id"] == unit_id), None)
+        if unit is None:
+            raise KeyError("Unidade inexistente")
+        available = can_participate(unit)
+        return {"unit_id": unit_id, "allowed": available,
+                "status": unit["readiness_status"], "readiness": unit["readiness"],
+                "rule": READINESS_VERSION,
+                "reason": "Disponível para exercício fictício" if available
+                  else "Indisponível para novas ações simuladas"}
+
     def staff_assign(self, session_id: str, agent: str) -> dict:
         """Nova tarefa documental para um integrante virtual; sem alterar o cenário."""
         if agent not in AGENTS:
@@ -206,6 +248,9 @@ class GameStore:
             "report_count": len(state["reports"]),
             "approved_features": sum(f["status"] == "approved" for f in state["features"]),
             "resource_variations": changes,
+            "unit_readiness": [{ "unit_id": u["id"], "name": u["name"],
+               "readiness": u["readiness"], "status": u["readiness_status"] }
+               for u in state["units"]],
             "methodology": "Resumo descritivo auditável, sem inferência de vitória, causalidade externa ou eficácia militar real.",
             "recommendations": [
                 "Conferir a origem e o momento de recebimento de cada relatório.",
