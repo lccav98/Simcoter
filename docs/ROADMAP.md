@@ -27,10 +27,11 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 
 ## M3 — Estado-Maior multijogador
 - [ ] PostgreSQL/PostGIS e WebSockets
-- [ ] Autenticação e controle por partido/função
+- [ ] Autenticação de usuários e controle por partido/função (credenciais experimentais por partida e filtragem de API na v0.5; identidade, revogação e LAN ainda pendentes)
 - [ ] Registro de relatórios multi-origem e validação humana
 - [ ] Histórico e sincronização de medidas aprovadas
 - [ ] Testes de tablets, notebooks e LAN sem internet pública
+- [x] Testes de API adicionados para negar acesso entre partidos e restringir ações de instrutor (execução CI a validar)
 
 ## M4 — Maturidade didática
 - [ ] Editor de exercícios e capacidades agregadas fictícias
