@@ -43,3 +43,25 @@ def apply_training_variation(unit: dict, change: int) -> dict:
 
 def can_participate(unit: dict) -> bool:
     return normalize_unit(unit)["available_for_simulated_actions"]
+
+
+def advance_turn(units: list[dict], turn: int) -> tuple[list[dict], list[dict]]:
+    """Erosão de 3 pontos/turno, inteiramente inventada para o exercício.
+
+    Não representa fadiga ou perdas reais nem parâmetros de combate.
+    O bloqueio é automático e persiste até ajuste pedagógico explícito.
+    """
+    updated = []
+    events = []
+    for unit in units:
+        previous = normalize_unit(unit)
+        current = apply_training_variation(previous, -3)
+        updated.append(current)
+        if previous["available_for_simulated_actions"] and not current["available_for_simulated_actions"]:
+            events.append({
+                "kind": "unit_unavailable", "turn": turn, "unit_id": unit["id"],
+                "rule": READINESS_VERSION,
+                "cause": "Índice didático atingiu o limite de indisponibilidade",
+                "before": previous["readiness"], "after": current["readiness"],
+            })
+    return updated, events
