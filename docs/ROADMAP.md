@@ -20,9 +20,9 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 ## M2 — Biblioteca e IA local
 - [x] Catálogo inicial de metadados com verificação de fonte/edição ainda pendente
 - [ ] Recuperação textual/semântica offline
-- [ ] Ollama opcional com respostas verificáveis
+- [x] Integração de código opcional com Ollama: evidências estruturadas, validação de IDs e fallback (teste com modelo real pendente)
 - [ ] Gerador contextual com schema e validador independente (propostas por regras objetivas já implementadas; validação de IA ainda pendente)
-- [ ] Testes contra contradições de cenário e citações falsas
+- [ ] Testes contra contradições de cenário e citações falsas (validação estrutural de evidências implementada; sem verificação de semântica)
 - [x] Motor MPS inicial: probabilidades fictícias, sementes reproduzíveis, ensaios de Monte Carlo, interface e testes (execução a verificar)
 
 ## M3 — Estado-Maior multijogador
