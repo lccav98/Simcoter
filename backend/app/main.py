@@ -93,3 +93,9 @@ def doctrine_catalog(q: str = ""):
 def context_problems(session_id: str):
     state = call(store.get, session_id)
     return analyze_context(state)
+
+
+@app.get("/api/sessions/{session_id}/probability")
+def probability_preview(session_id: str, repetitions: int = 500):
+    """Prévia estatística abstrata e não mutável do próximo turno."""
+    return call(store.probability_preview, session_id, repetitions)
