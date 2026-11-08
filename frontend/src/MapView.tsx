@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
+import { offlineStyle } from "./offlineMap";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   createUnitMarker, symbolMarkup, safeKind, safeEchelon, readinessInfo,
@@ -82,19 +83,13 @@ export default function MapView({units,features,environment}:Props) {
     }
     const map=new maplibregl.Map({
       container:container.current,
-      style:{
-        version:8,
-        sources:{"osm-base":{type:"raster",
-          tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-          tileSize:256,maxzoom:19,attribution:"© OpenStreetMap contributors"}},
-        layers:[{id:"osm-base-layer",type:"raster",source:"osm-base"}],
-      },
+      style:offlineStyle(),
       center:ANCHOR,zoom:10.2,attributionControl:{},
     });
     mapRef.current=map;
     map.addControl(new maplibregl.NavigationControl({showZoom:true,showCompass:true}),"top-right");
     map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
-    // style.load independe do download efetivo dos tiles públicos.
+    // Base e sobreposições disponíveis sem serviços externos.
     map.once("style.load",()=>{
       const current=latest.current;
       const data=overlays(current.features,current.filters.overlays);
@@ -145,7 +140,7 @@ export default function MapView({units,features,environment}:Props) {
   }));
   return <div className="mapShell">
     <div className="mapToolbar">
-      <span className="mapToolbarTitle">CARTA INTERATIVA <span>• cenário fictício</span></span>
+      <span className="mapToolbarTitle">CARTA INTERATIVA <span>• base sintética offline</span></span>
       <button type="button" className="mapLegendToggle"
         aria-expanded={legendOpen} aria-controls="simcoter-map-legend"
         onClick={()=>setLegendOpen(v=>!v)}>

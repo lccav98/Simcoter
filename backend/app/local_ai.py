@@ -153,7 +153,7 @@ def explain(state: dict) -> dict:
             headers={"Content-Type": "application/json"}, method="POST",
         )
         # Impede redirecionamento para rede externa.
-        opener = request.build_opener(_NoRedirect)
+        opener = request.build_opener(request.ProxyHandler({}), _NoRedirect)
         with opener.open(req, timeout=20) as response:
             if response.status != 200:
                 raise ValueError("Resposta HTTP não permitida")

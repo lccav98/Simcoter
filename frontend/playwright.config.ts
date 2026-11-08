@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 const localPython = fileURLToPath(new URL("../.venv/Scripts/python.exe", import.meta.url));
 
 export default defineConfig({
@@ -8,7 +10,7 @@ export default defineConfig({
   timeout: 30000,
   expect: { timeout: 10000 },
   use: {
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: "http://127.0.0.1:18000",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -23,11 +25,11 @@ export default defineConfig({
     } },
   ],
   webServer: {
-    command: `"${existsSync(localPython) ? localPython : "python"}" -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`,
+    command: `"${existsSync(localPython) ? localPython : "python"}" -m uvicorn backend.app.main:app --host 127.0.0.1 --port 18000`,
     cwd: fileURLToPath(new URL("../", import.meta.url)),
-    url: "http://127.0.0.1:8000/api/health",
+    url: "http://127.0.0.1:18000/api/health",
     timeout: 30000,
     reuseExistingServer: false,
-    env: { SIMCOTER_AI_ENABLED: "false" },
+    env: { SIMCOTER_AI_ENABLED: "false", SIMCOTER_DB: join(mkdtempSync(join(tmpdir(), "simcoter-e2e-")), "test.sqlite3") },
   },
 });

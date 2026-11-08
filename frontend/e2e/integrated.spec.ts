@@ -134,3 +134,25 @@ test("prontidão no calunga e regras ambientais visíveis para instrutor", async
   await page.getByRole("button",{name:"Solicitar análise"}).click();
   await expect(page.getByText(/clima didático: severe/)).toBeVisible();
 });
+
+test("mapa sintético funciona sem requisições externas", async ({ page }) => {
+  const external: string[] = [];
+  await page.route("**/*", async route => {
+    const url = new URL(route.request().url());
+    if (url.protocol.startsWith("http") && url.hostname !== "127.0.0.1") {
+      external.push(url.origin);
+      await route.abort();
+    } else {
+      await route.continue();
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Criar partida individual" }).click();
+  await expect(page.getByText("base sintética offline")).toBeVisible();
+  await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect(page.locator(".military-unit-marker")).toHaveCount(3);
+  await page.getByRole("button", { name: "Já salvei as credenciais" }).click();
+  await page.reload();
+  await expect(page.locator(".military-unit-marker")).toHaveCount(3);
+  expect(external).toEqual([]);
+});

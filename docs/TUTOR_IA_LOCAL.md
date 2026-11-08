@@ -63,3 +63,5 @@ A partir da versão 0.5, a API exige token de instrutor para essa rota, mas aind
 Os testes com cliente HTTP falso verificam fallback, validação dos IDs, restrições de origem local e ausência de texto livre no recorte. Não comprovam qualidade de um modelo real.
 
 Referências técnicas: [Ollama API](https://docs.ollama.com/api), [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs), [FastAPI](https://fastapi.tiangolo.com/).
+
+A conexão agora ignora proxies do sistema explicitamente. Serviço Ollama ausente na validação de 2026-11-08; testes automatizados não substituem execução com modelo real.

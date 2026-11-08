@@ -96,3 +96,20 @@ def test_bad_ollama_output_falls_back(monkeypatch, scenario):
         lambda *handlers: type("Opener", (), {"open": lambda self, *a, **k: BadResponse()})()
     )
     assert local_ai.explain(scenario)["mode"] == "rules_fallback"
+
+def test_local_request_explicitly_disables_system_proxy(monkeypatch, scenario):
+    monkeypatch.setenv("SIMCOTER_AI_ENABLED", "true")
+    monkeypatch.setenv("HTTP_PROXY", "http://proxy.invalid:8080")
+    inspected = []
+    def build(*handlers):
+        proxy = next(h for h in handlers if isinstance(h, local_ai.request.ProxyHandler))
+        assert proxy.proxies == {}
+        assert local_ai._NoRedirect in handlers
+        inspected.append(True)
+        class Offline:
+            def open(self, *args, **kwargs):
+                raise OSError("local service unavailable")
+        return Offline()
+    monkeypatch.setattr(local_ai.request, "build_opener", build)
+    assert local_ai.explain(scenario)["mode"] == "rules_fallback"
+    assert inspected == [True]

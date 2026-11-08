@@ -21,3 +21,5 @@ Pendências: solucionar lançamento dos navegadores e validar interface; WebKit/
 ## Continuação validada
 50 testes Python e 16 testes Playwright (Chromium headless e WebKit com viewport iPad) passaram. Corrigida perda de role nas respostas de mutação da API e teste de clima selecionando E3. Inicializador Windows executado até Uvicorn em 127.0.0.1:8000, com build e HTTP 200 confirmados. Corrigida saída silenciosa quando .venv já existia. Cartografia offline e Ollama real permanecem pendentes. WebKit não substitui teste em iPad físico.
 
+
+Atualização: base sintética offline validada; 18 testes Playwright e 51 Python passaram. Consulte CARTOGRAFIA_OFFLINE.md. Banco de E2E agora isolado em diretório temporário e porta 18000.
