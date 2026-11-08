@@ -119,14 +119,25 @@ class GameStore:
             # Consumo de abstrações didáticas: não corresponde a fatores de planejamento reais.
             for key in state["resources"]:
                 state["resources"][key] = max(0, state["resources"][key] - 2)
-            index = roll(state["seed"], turn)
-            title, resource, cost = TEACHING_EVENTS[index]
+            # Somente categorias com justificativa no estado da partida.
+            # Queda abaixo de um patamar cria ocorrência contextual de revisão.
+            eligible = [
+                (i, item) for i, item in enumerate(TEACHING_EVENTS)
+                if state["resources"][item[1]] <= 85
+            ]
+            # Se nenhum indicador foi afetado, o turno permanece sem ocorrência.
+            if not eligible:
+                state["turn"] = turn
+                state["events"].append({"kind": "routine_turn", "turn": turn, "rule": "simcoter-v1"})
+                self._save(db, state)
+                return state
+            index, (title, resource, cost) = eligible[roll(state["seed"], turn) % len(eligible)]
             before = state["resources"][resource]
             state["resources"][resource] = max(0, before - cost)
             state["turn"] = turn
             state["events"].append({
                 "kind": "scenario_event", "turn": turn, "name": title,
-                "cause": "Evento pedagógico previsto no catálogo fictício",
+                "cause": f"Indicador fictício {resource} em {before}, dentro do patamar de revisão (<=85)",
                 "rule": "simcoter-v1", "resource": resource, "effect": before - state["resources"][resource],
             })
             self._save(db, state)
