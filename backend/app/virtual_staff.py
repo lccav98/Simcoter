@@ -57,15 +57,15 @@ def create_proposal(state: dict, agent: str) -> dict:
     elif agent == "E3":
         pending = sum(f["status"] == "proposed" for f in evidence["features"])
         title = "Verificação de documentos e medidas"
-        note = (f"Há {pending} medidas pendentes e {evidence[\'unavailable_count\']} unidades fictícias indisponíveis; "
-                f"clima didático: {evidence[\'weather\']}. Revisar a consistência documental das restrições.")
+        note = (f"Há {pending} medidas pendentes e {evidence['unavailable_count']} unidades fictícias indisponíveis; "
+                f"clima didático: {evidence['weather']}. Revisar a consistência documental das restrições.")
     else:
         low = [k for k, v in evidence["resources"].items() if v <= 75]
         title = "Análise administrativa de indicadores logísticos"
         note = (("Revisar documentação dos indicadores: " + ", ".join(low) + ". "
                  if low else "Conferir indicadores fictícios. ")
-                + f"Condição climática do exercício: {evidence[\'weather\']}; "
-                + f"unidades indisponíveis: {evidence[\'unavailable_count\']}.")
+                + f"Condição climática do exercício: {evidence['weather']}; "
+                + f"unidades indisponíveis: {evidence['unavailable_count']}.")
     evidence_json = json.dumps(evidence, ensure_ascii=False, sort_keys=True)
     digest = sha256((STAFF_VERSION + "|" + agent + "|" + evidence_json).encode()).hexdigest()
     return {
