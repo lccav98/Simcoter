@@ -34,9 +34,12 @@ def _evidence_snapshot(state: dict, agent: str) -> dict:
                 sorted(set(r["source"] for r in state["reports"])), "turn": state["turn"]}
     if agent == "E3":
         return {"features": [{"id": f["id"], "status": f["status"]} for f in state["features"]],
-                "turn": state["turn"]}
+                "turn": state["turn"], "weather": state.get("weather","normal"),
+                "unavailable_count": sum(u.get("readiness_status")=="indisponivel" for u in state["units"])}
     if agent == "E4":
-        return {"resources": dict(state["resources"]), "turn": state["turn"]}
+        return {"resources": dict(state["resources"]), "turn": state["turn"],
+                "weather": state.get("weather","normal"),
+                "unavailable_count": sum(u.get("readiness_status")=="indisponivel" for u in state["units"])}
     raise ValueError("Agente inexistente")
 
 
@@ -54,12 +57,15 @@ def create_proposal(state: dict, agent: str) -> dict:
     elif agent == "E3":
         pending = sum(f["status"] == "proposed" for f in evidence["features"])
         title = "Verificação de documentos e medidas"
-        note = f"Há {pending} medidas pendentes; conferir os registros e aprovações pertinentes."
+        note = (f"Há {pending} medidas pendentes e {evidence[\'unavailable_count\']} unidades fictícias indisponíveis; "
+                f"clima didático: {evidence[\'weather\']}. Revisar a consistência documental das restrições.")
     else:
         low = [k for k, v in evidence["resources"].items() if v <= 75]
         title = "Análise administrativa de indicadores logísticos"
-        note = ("Revisar documentação dos indicadores: " + ", ".join(low)
-                if low else "Conferir as previsões e a consistência dos indicadores fictícios.")
+        note = (("Revisar documentação dos indicadores: " + ", ".join(low) + ". "
+                 if low else "Conferir indicadores fictícios. ")
+                + f"Condição climática do exercício: {evidence[\'weather\']}; "
+                + f"unidades indisponíveis: {evidence[\'unavailable_count\']}.")
     evidence_json = json.dumps(evidence, ensure_ascii=False, sort_keys=True)
     digest = sha256((STAFF_VERSION + "|" + agent + "|" + evidence_json).encode()).hexdigest()
     return {
