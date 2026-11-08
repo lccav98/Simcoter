@@ -10,6 +10,10 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [ ] Verificar direitos de uso de fontes doutrinárias e dados cartográficos
 
 ## M1 — Protótipo individual
+- [x] Servidor local único para interface compilada e API FastAPI (versão 0.8, teste CI a confirmar)
+- [x] Scripts Windows/Linux/macOS para preparar e executar o protótipo
+- [x] Teste automatizado de fluxo integrado por HTTP local (execução a confirmar)
+- [ ] Implantação autenticada HTTPS para acesso no Safari do iPad e testes reais de toque/WebGL
 - [x] Código inicial de interface React/TypeScript responsiva (a validar)
 - [x] Código inicial de API FastAPI e banco SQLite (a validar)
 - [x] Cenário sintético e gestão individual de partidas (código inicial)
