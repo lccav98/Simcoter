@@ -93,6 +93,23 @@
 | RF-65 | O | Ensaios Monte Carlo do próximo turno sem alterar a partida |
 | RF-66 | O | Documentar distribuições, limites e incerteza sem extrapolação para combate real |
 
+## Estado-Maior Virtual (proposta incremental)
+
+| ID | P | Requisito |
+| --- | --- | --- |
+| RF-67 | O | Estado-Maior Virtual no modo individual |
+| RF-68 | O | Agentes lógicos especializados por seção e função |
+| RF-69 | O | Um modelo local compartilhado, quando IA for ativada |
+| RF-70 | O | Contextos mínimos por agente e controle de permissões |
+| RF-71 | O | Registro de tarefas e acompanhamento pelo coordenador |
+| RF-72 | O | Consolidação de pendências pelo Chefe do EM virtual |
+| RF-73 | O | Aprovação ou rejeição de propostas pelo jogador |
+| RF-74 | O | Histórico auditável e evidência ligada à proposta |
+| RF-75 | E | Adaptador opcional para Paperclip AI |
+| RF-76 | O | Funcionamento sem Paperclip nem serviço externo |
+| RF-77 | E | Limites de concorrência, memória e tempo dos agentes |
+| RF-78 | O | Validação de coerência e evidências dos agentes |
+
 ## Critérios de aceite de primeira versão (MVP)
 
 - Usuário cria cenário sintético e abre partida individual no navegador.
