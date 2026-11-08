@@ -22,7 +22,7 @@ O frontend contém `frontend/src/militarySymbols.ts`, um gerador de SVG em memó
 | `name` | Texto livre da organização fictícia | Rótulo acessível e janela informativa |
 | `x`, `y` | Coordenadas sintéticas do exemplo | Transformadas em localização de demonstração no MapLibre |
 
-A primeira amostra usa três unidades fictícias com tipos e escalões diferentes. O SVG é gerado localmente, sem imagens externas ou duplicação de arquivos de terceiros.
+A amostra do cenário ainda utiliza três unidades fictícias com tipos e escalões diferentes. O catálogo de componentes foi ampliado para **sete naturezas gráficas didáticas**: infantaria, logística, comando, engenharia, comunicações, saúde e transporte. Todos são desenhados em SVG localmente, sem reutilizar imagens de terceiros. Os quatro escalões fictícios são pelotão, companhia, batalhão e brigada.
 
 ## Regras de projeto
 
@@ -37,4 +37,6 @@ A primeira amostra usa três unidades fictícias com tipos e escalões diferente
 
 Os ícones de logística e comando são **desenhos genéricos originais de interface**; não há afirmação de que coincidam com pictogramas oficiais. A simbologia militar oficial possui categorias, modificadores, amplificadores, extensões e regras não implementadas. Não existe exportação SIDC validada, integração direta com o portal de simbologia ou homologação doutrinária.
 
-Próximas etapas: conferir as regras e exemplos do MD33-C-01 visualmente, implementar um catálogo tipado por código, adicionar legenda interativa, testes de compatibilidade e mapeamento entre entidade e simbologia sem armazenar dados operacionais reais.
+**Legenda interativa implementada:** o mapa permite ocultar ou mostrar unidades por partido e natureza presente no cenário, além das medidas gráficas aprovadas. O catálogo apresenta identificação acessível, e o backend continua sendo responsável por filtrar o que cada partido pode visualizar. Não há catálogo SIDC oficial ou homologação.
+
+**Próximas etapas:** conferir visualmente as regras e exemplos oficiais do MD33-C-01, criar catálogo de códigos tipados após curadoria, verificar precisão dos pictogramas e realizar testes completos de navegador e iPad real.
