@@ -74,10 +74,11 @@ npm run build
 - Propostas de problemas pedagógicos condicionadas a gatilhos objetivos da partida.
 - Motor Probabilístico de Simulação (MPS) com eventos condicionados e efeitos abstratos, e painel de repetições Monte Carlo do próximo turno.
 - Consulta `GET /api/sessions/{id}/probability?repetitions=500` não altera os dados da partida.
+- Tutor opcional: `GET /api/sessions/{id}/ai/explanation`, com fallback sem IA e sem alteração de estado.
 
 ## 6. Limitações importantes
 
-- **Não há IA implementada**, apesar de existir a previsão de integração local com Ollama.
+- **Há integração opcional de código com Ollama** para explicação didática, desativada por padrão; não foi validada com modelo real. Veja [TUTOR_IA_LOCAL.md](TUTOR_IA_LOCAL.md).
 - **Não há multijogador**, autenticação, separação real de dados entre partidos ou segurança para uso em redes compartilhadas.
 - **Não há PWA offline instalável** nem integração com map.army/MapLibre neste estágio; o mapa é um SVG original, ilustrativo e sem georreferenciamento.
 - Os parâmetros são puramente fictícios; não se trata de previsão militar ou reprodução do DAMEPLAN.
