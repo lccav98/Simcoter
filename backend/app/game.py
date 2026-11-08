@@ -9,6 +9,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .probability import sample_transition, forecast
+
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
     ("Atraso administrativo no recebimento de materiais", "suprimentos", 4),
@@ -116,32 +118,16 @@ class GameStore:
             if state["turn"] >= 20:
                 raise ValueError("Limite didático de 20 turnos atingido")
             turn = state["turn"] + 1
-            # Consumo de abstrações didáticas: não corresponde a fatores de planejamento reais.
-            for key in state["resources"]:
-                state["resources"][key] = max(0, state["resources"][key] - 2)
-            # Somente categorias com justificativa no estado da partida.
-            # Queda abaixo de um patamar cria ocorrência contextual de revisão.
-            eligible = [
-                (i, item) for i, item in enumerate(TEACHING_EVENTS)
-                if state["resources"][item[1]] <= 85
-            ]
-            # Se nenhum indicador foi afetado, o turno permanece sem ocorrência.
-            if not eligible:
-                state["turn"] = turn
-                state["events"].append({"kind": "routine_turn", "turn": turn, "rule": "simcoter-v1"})
-                self._save(db, state)
-                return state
-            index, (title, resource, cost) = eligible[roll(state["seed"], turn) % len(eligible)]
-            before = state["resources"][resource]
-            state["resources"][resource] = max(0, before - cost)
+            transition = sample_transition(state["resources"], state["seed"], turn)
+            state["resources"] = transition["resources"]
             state["turn"] = turn
-            state["events"].append({
-                "kind": "scenario_event", "turn": turn, "name": title,
-                "cause": f"Indicador fictício {resource} em {before}, dentro do patamar de revisão (<=85)",
-                "rule": "simcoter-v1", "resource": resource, "effect": before - state["resources"][resource],
-            })
+            state["events"].append(transition["event"])
             self._save(db, state)
         return state
+
+    def probability_preview(self, session_id: str, repetitions: int = 500) -> dict:
+        state = self.get(session_id)
+        return forecast(state["resources"], state["seed"], state["turn"], repetitions)
 
     def apa(self, session_id: str) -> dict:
         state = self.get(session_id)
