@@ -185,3 +185,17 @@ footer{padding:28px 12px 14px;text-align:center;font-size:11px;color:#9cbbbd;let
  .mapToolbar{padding:9px}.mapToolbarTitle{font-size:10px}
  .symbolLegendList{grid-template-columns:1fr}
 }
+
+/* Ambiente sonoro: volume conservador, acessível por toque e silencioso por padrão. */
+.audioPanel{border-color:#4a625e}
+.audioControls{display:grid;gap:14px}
+.audioControls>label{display:grid;gap:9px;color:#d8e5e1;font-size:12px;font-weight:700}
+.audioControls input[type="range"]{width:100%;min-height:35px;accent-color:#d6b16d;cursor:pointer}
+.audioControls input[type="range"]:disabled{cursor:not-allowed}
+.audioControls button{min-height:44px}
+.audioControls button[aria-pressed="true"]{background:#5c4741;border-color:#ac7971}
+.audioPanel [role="status"]{min-height:30px;margin-bottom:0}
+@media(max-width:950px){.audioControls{grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
+ .audioControls button:last-child{grid-column:span 2}}
+@media(max-width:600px){.audioControls{grid-template-columns:1fr}
+ .audioControls button:last-child{grid-column:auto}}
