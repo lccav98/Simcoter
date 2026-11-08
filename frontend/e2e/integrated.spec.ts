@@ -16,6 +16,8 @@ test("fluxo integrado: criar, MapLibre, EMV, turno e APA", async ({ page }) => {
     await expect(page.locator(".maplibregl-ctrl-zoom-in")).toBeVisible();
     await expect(page.locator(".maplibregl-ctrl-zoom-out")).toBeVisible();
     await expect(page.locator(".maplibregl-ctrl-scale")).toBeVisible();
+    await expect(page.locator(".military-unit-marker")).toHaveCount(3);
+    await expect(page.locator(".military-unit-marker svg").first()).toBeVisible();
   } else {
     await expect(page.getByText("Este navegador não disponibiliza WebGL para o MapLibre.")).toBeVisible();
   }
