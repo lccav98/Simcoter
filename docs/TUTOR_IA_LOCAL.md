@@ -54,7 +54,7 @@ A instalação inicial de pacotes e modelos demanda acesso ao respectivo reposit
 
 ## Segurança e isolamento
 
-O backend atual não possui autenticação e não isola a consulta por partido. A síntese acessa um estado global do cenário, ainda que reduzido a metadados. **Nunca habilitar fora de localhost, em rede compartilhada ou com informações sensíveis.** Antes da implementação multijogador, criar visões de evidência por partido, autenticação, autorização, testes contra vazamento de dados e controle administrativo da IA.
+A partir da versão 0.5, a API exige token de instrutor para essa rota, mas ainda não há identidades individuais, revogação, criptografia em trânsito nem homologação de isolamento no multijogador. A síntese acessa um estado global do cenário, ainda que reduzido a metadados. **Nunca habilitar fora de localhost, em rede compartilhada ou com informações sensíveis.** Antes da implementação multijogador, criar visões de evidência por partido, autenticação, autorização, testes contra vazamento de dados e controle administrativo da IA.
 
 ## Testes
 
