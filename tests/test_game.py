@@ -32,7 +32,7 @@ def test_report_and_apa_have_evidence(tmp_path: Path):
     assert apa["report_count"] == 1
     assert apa["approved_features"] == 1
     assert apa["turns"] == 1
-    assert apa["events"][0]["rule"] == "simcoter-v1"
+    assert apa["events"][0]["rule"] == "mps-educacional-v1"
     assert set(apa["resource_variations"]) == set(INITIAL_RESOURCES)
 
 
