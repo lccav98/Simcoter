@@ -169,25 +169,6 @@ def review_staff_task(
     return call(store.staff_review, session_id, task_id, body.action)
 
 
-# Servir o build Vite na mesma origem da API. A montagem só ocorre quando
-# o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
-DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
-if (DIST_DIR / "index.html").is_file():
-    if (DIST_DIR / "assets").is_dir():
-        app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="frontend-assets")
-
-    @app.get("/", include_in_schema=False)
-    def index_page():
-        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
-
-    @app.get("/{frontend_path:path}", include_in_schema=False)
-    def spa_page(frontend_path: str):
-        # Não devolver HTML para APIs ou recursos ausentes com extensão.
-        if frontend_path == "api" or frontend_path.startswith("api/") or Path(frontend_path).suffix:
-            raise HTTPException(status_code=404, detail="Recurso não encontrado")
-        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
-
-
 class ReadinessUpdate(BaseModel):
     change: int = Field(ge=-100, le=100)
 
@@ -212,3 +193,69 @@ def check_unit_availability(
     if unit is None or (role != "instrutor" and unit["party"] != role):
         raise HTTPException(status_code=404, detail="Unidade não encontrada")
     return call(store.validate_unit_action, session_id, unit_id)
+
+
+class WeatherUpdate(BaseModel):
+    weather: str
+
+
+class MovementRequest(BaseModel):
+    x: int = Field(ge=0,le=100)
+    y: int = Field(ge=0,le=100)
+    authorized: bool = False
+
+
+@app.get("/api/sessions/{session_id}/environment")
+def get_environment(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return call(store.environment, session_id)
+
+
+@app.post("/api/sessions/{session_id}/environment/weather")
+def update_weather(
+    session_id: str, body: WeatherUpdate,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.change_weather, session_id, body.weather)
+
+
+@app.post("/api/sessions/{session_id}/units/{unit_id}/movement/check")
+def check_movement(
+    session_id: str, unit_id: str, body: MovementRequest,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.unit_movement_check, session_id, unit_id,
+                body.x, body.y, body.authorized)
+
+
+@app.post("/api/sessions/{session_id}/units/{unit_id}/movement")
+def apply_movement(
+    session_id: str, unit_id: str, body: MovementRequest,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.move_unit, session_id, unit_id,
+                body.x, body.y, body.authorized)
+
+
+# Servir o build Vite na mesma origem da API. A montagem só ocorre quando
+# o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
+DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if (DIST_DIR / "index.html").is_file():
+    if (DIST_DIR / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="frontend-assets")
+
+    @app.get("/", include_in_schema=False)
+    def index_page():
+        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
+
+    @app.get("/{frontend_path:path}", include_in_schema=False)
+    def spa_page(frontend_path: str):
+        # Não devolver HTML para APIs ou recursos ausentes com extensão.
+        if frontend_path == "api" or frontend_path.startswith("api/") or Path(frontend_path).suffix:
+            raise HTTPException(status_code=404, detail="Recurso não encontrado")
+        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
+
+
