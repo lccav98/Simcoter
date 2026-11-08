@@ -9,6 +9,10 @@ type Report = {id:string;party:string;source:string;message:string;turn:number;t
 type Event = {kind:string;turn:number;name?:string;cause?:string;resource?:string;effect?:number};
 type Session = {id:string;title:string;turn:number;seed:number;resources:Record<Resource,number>;units:Unit[];features:Feature[];reports:Report[];events:Event[]};
 type APA = {turns:number;report_count:number;approved_features:number;resource_variations:Record<string,number>;events:Event[];methodology:string;recommendations:string[]};
+type Problem = {id:string;category:string;title:string;summary:string;evidence:string[];trigger:string;question:string;rule:string};
+type ContextResult = {turn:number;generation_mode:string;context_hash:string;problems:Problem[]};
+type DoctrineItem = {code:string;title:string;category:string;edition_status:string;verification:string;reference_url:string};
+type DoctrineResult = {items:DoctrineItem[];mode:string;verified_citations:boolean};
 async function request<T>(url:string, method="GET", body?:unknown):Promise<T> {
   const response = await fetch(url, {method,headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
   if(!response.ok){let msg="Erro na solicitação";try{const e=await response.json();msg=e.detail??msg}catch{}throw new Error(msg)}
@@ -35,18 +39,23 @@ function Map({data}:{data:Session}){
 function App(){
  const [data,setData]=useState<Session|null>(null);
  const [apa,setApa]=useState<APA|null>(null);
+ const [context,setContext]=useState<ContextResult|null>(null);
+ const [doctrine,setDoctrine]=useState<DoctrineResult|null>(null);
+ const [query,setQuery]=useState("");
  const [source,setSource]=useState("E4 fictício");
  const [message,setMessage]=useState("");
  const [party,setParty]=useState("azul");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  useEffect(()=>{const id=localStorage.getItem("simcoter-session");if(id)request<Session>(`/api/sessions/${id}`).then(setData).catch(()=>localStorage.removeItem("simcoter-session"))},[]);
- async function apply(action:()=>Promise<Session>){setBusy(true);setError("");try{const next=await action();setData(next);setApa(null);localStorage.setItem("simcoter-session",next.id)}catch(e){setError(String(e))}finally{setBusy(false)}}
+ async function apply(action:()=>Promise<Session>){setBusy(true);setError("");try{const next=await action();setData(next);setApa(null);setContext(null);localStorage.setItem("simcoter-session",next.id)}catch(e){setError(String(e))}finally{setBusy(false)}}
  const create=()=>apply(()=>request("/api/sessions","POST",{title:"Exercício Horizonte",seed:2026}));
  const turn=()=>data&&apply(()=>request(`/api/sessions/${data.id}/turns`,"POST"));
  const approve=(id:string)=>data&&apply(()=>request(`/api/sessions/${data.id}/features/${id}/approve`,"POST"));
  const report=()=>{if(!data||!message.trim())return;apply(()=>request(`/api/sessions/${data.id}/reports`,"POST",{source,message,party}));setMessage("")};
  const loadApa=async()=>{if(data){setError("");try{setApa(await request(`/api/sessions/${data.id}/apa`))}catch(e){setError(String(e))}}};
+ const loadContext=async()=>{if(data){setError("");try{setContext(await request(`/api/sessions/${data.id}/context`))}catch(e){setError(String(e))}}};
+ const searchDoctrine=async()=>{setError("");try{setDoctrine(await request(`/api/doctrine?q=${encodeURIComponent(query)}`))}catch(e){setError(String(e))}};
  return <main className="app">
   <header className="top"><div><small>Protótipo educacional local · v0.1</small><h1>SIMCOTER</h1><p>Sistema Integrado de Modelagem e Condução de Operações Terrestres</p></div><button onClick={create} disabled={busy}>{data?"Nova partida":"Iniciar exercício"}</button></header>
   {!data?<section className="panel"><h2>Exercício Horizonte</h2><p>Uma experiência inicial com mapa fictício, registro de informações, turnos e análise de resultados. Este protótipo ainda não possui IA, multijogador ou doutrina integrada.</p><button onClick={create}>Criar partida individual</button></section>:
@@ -54,6 +63,8 @@ function App(){
     <aside className="panel"><h2>Indicadores logísticos fictícios</h2>{Object.entries(data.resources).map(([name,val])=><div className="indicator" key={name}><label>{name} <strong>{val}/100</strong></label><div className="bar"><div style={{width:`${val}%`}}/></div></div>)}<button disabled={busy||data.turn>=20} onClick={turn}>Avançar turno</button><p className="muted">Eventos com causa registrada e regras reproduzíveis. Os índices não representam capacidades militares reais.</p></aside>
     <section className="panel"><h2>Informações do Estado-Maior fictício</h2><div className="form"><label>Origem<input value={source} maxLength={120} onChange={e=>setSource(e.target.value)}/></label><label>Partido<select value={party} onChange={e=>setParty(e.target.value)}><option value="azul">Azul</option><option value="vermelha">Vermelho</option><option value="instrutor">Instrutor</option></select></label><label>Relatório<textarea value={message} maxLength={1000} onChange={e=>setMessage(e.target.value)} placeholder="Registre um acontecimento ou informação fictícia"/></label><button disabled={busy||!message.trim()||!source.trim()} onClick={report}>Registrar relatório</button></div><div className="timeline">{data.reports.slice().reverse().map(r=><article key={r.id}><b>{r.source}</b> · {r.party} · turno {r.turn}<p>{r.message}</p></article>)}</div></section>
     <section className="panel"><h2>Histórico e Análise Pós-Ação</h2><button onClick={loadApa}>Gerar APA descritiva</button>{apa&&<div className="apa"><p><strong>{apa.turns}</strong> turnos · <strong>{apa.report_count}</strong> relatórios · <strong>{apa.approved_features}</strong> medidas aprovadas</p><h3>Alterações de indicadores</h3>{Object.entries(apa.resource_variations).map(([k,v])=><p key={k}>{k}: −{v}</p>)}<p className="muted">{apa.methodology}</p>{apa.recommendations.map(x=><p key={x}>• {x}</p>)}</div>}<h3>Últimos eventos</h3><div className="timeline">{data.events.slice(-7).reverse().map((e,i)=><article key={i}><b>Turno {e.turn}</b> — {e.name??e.kind}{e.cause&&<p>{e.cause}</p>}</article>)}</div></section>
+   <section className="panel"><h2>Problemas contextuais</h2><p className="muted">Propostas pedagógicas baseadas nos indicadores da partida, sem geração aleatória ou IA generativa.</p><button onClick={loadContext}>Analisar situação</button>{context&&<div className="timeline">{context.problems.length===0?<p className="muted">Nenhum gatilho contextual ativo neste turno.</p>:context.problems.map(p=><article key={p.id}><b>{p.title}</b><p>{p.summary}</p><p><strong>Gatilho:</strong> {p.trigger}</p><p><strong>Evidências:</strong> {p.evidence.join(" · ")}</p><p>{p.question}</p></article>)}</div>}</section>
+   <section className="panel"><h2>Biblioteca doutrinária local</h2><p className="muted">Catálogo inicial de metadados. Nenhum manual completo foi importado ou validado.</p><div className="search"><input aria-label="Pesquisar referências" placeholder="Ex.: logística, PPCOT, DAMEPLAN" value={query} onChange={e=>setQuery(e.target.value)}/><button onClick={searchDoctrine}>Pesquisar</button></div>{doctrine&&<div className="timeline">{doctrine.items.length===0?<p className="muted">Nenhuma referência encontrada.</p>:doctrine.items.map(d=><article key={d.code}><b>{d.code}</b> — {d.title}<p>{d.category} · {d.edition_status}</p><p>{d.verification}</p><a href={d.reference_url} target="_blank" rel="noreferrer">Portal institucional</a></article>)}</div>}</section>
    </div>}
   {error&&<p className="error" role="alert">{error}</p>}<footer>SIMCOTER · Dados, organizações e resultados exclusivamente fictícios · Sem função de comando e controle real</footer>
  </main>
