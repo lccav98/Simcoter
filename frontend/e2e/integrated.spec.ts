@@ -106,3 +106,30 @@ test("som opcional: desativado por padrão, volume e prévia sem alterar partida
   await page.getByRole("button", { name: "Silenciar áudio" }).click();
   await expect(page.getByRole("button", { name: "Ativar áudio" })).toHaveAttribute("aria-pressed","false");
 });
+
+
+test("prontidão no calunga e regras ambientais visíveis para instrutor", async ({page}) => {
+  await page.goto("/");
+  await page.getByRole("button", {name:"Criar partida individual"}).click();
+  await page.getByRole("button", {name:"Legenda e camadas"}).click();
+  const legend=page.getByRole("region",{name:"Legenda e filtros cartográficos"});
+  await expect(legend.getByText(/Índice didático: 84%/)).toBeVisible();
+  await page.getByRole("button",{name:"Ocultar legenda"}).click();
+
+  await page.getByRole("button",{name:"Reduzir prontidão fictícia de Unidade fictícia Azul 2"}).click();
+  await expect(page.getByText(/45% · ATENÇÃO/)).toBeVisible();
+
+  await page.getByRole("button",{name:"Planejamento",exact:true}).click();
+  await expect(page.getByText("Terreno e clima do exercício")).toBeVisible();
+  await page.getByRole("button",{name:"Verificar disponibilidade"}).click();
+  await expect(page.getByText("Permitido no exercício")).toBeVisible();
+
+  await page.getByLabel("Condição climática").selectOption("severe");
+  await page.getByRole("button",{name:"Verificar disponibilidade"}).click();
+  await expect(page.getByText("Bloqueado no exercício")).toBeVisible();
+  await expect(page.getByText(/Suspensão climática fictícia/)).toBeVisible();
+
+  await page.getByRole("button",{name:"Estado-Maior",exact:true}).click();
+  await page.getByRole("button",{name:"Solicitar análise"}).click();
+  await expect(page.getByText(/clima didático: severe/)).toBeVisible();
+});
