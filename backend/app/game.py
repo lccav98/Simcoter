@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .probability import sample_transition, forecast
+from .access import issue_credentials, fingerprint, verify_fingerprint
 
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
@@ -47,6 +48,7 @@ class GameStore:
         self._lock = threading.RLock()
         with self._connect() as db:
             db.execute("CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, state TEXT NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS access_tokens (session_id TEXT NOT NULL, role TEXT NOT NULL, token_hash TEXT NOT NULL, PRIMARY KEY(session_id, role))")
             db.commit()
 
     def _connect(self):
@@ -78,6 +80,31 @@ class GameStore:
         with self._lock, self._connect() as db:
             self._save(db, state)
         return state
+
+    def create_with_credentials(self, title: str = "Exercício Horizonte", seed: int = 2026) -> dict:
+        """Credenciais são fornecidas uma única vez ao criador da partida."""
+        with self._lock:
+            state = self.create(title, seed)
+            tokens = issue_credentials()
+            with self._connect() as db:
+                db.executemany(
+                    "INSERT INTO access_tokens(session_id, role, token_hash) VALUES(?, ?, ?)",
+                    [(state["id"], role, fingerprint(token)) for role, token in tokens.items()],
+                )
+                db.commit()
+        return {"session": state, "credentials": tokens}
+
+    def authenticate(self, session_id: str, token: str) -> str | None:
+        if not token or len(token) > 256:
+            return None
+        with self._lock, self._connect() as db:
+            rows = db.execute(
+                "SELECT role, token_hash FROM access_tokens WHERE session_id=?", (session_id,)
+            ).fetchall()
+        for role, hashed in rows:
+            if verify_fingerprint(token, hashed):
+                return role
+        return None
 
     def get(self, session_id: str) -> dict:
         with self._lock, self._connect() as db:
