@@ -8,7 +8,7 @@
 
 O SIMCOTER é um projeto de plataforma **educacional** de planejamento e simulação de exercícios fictícios, inspirado em publicações públicas e autorizadas da doutrina do Exército Brasileiro. O projeto prevê treinamento **individual e multijogador**, em tablets e computadores comuns, por navegador, usando rede local e sem dependência da internet pública durante os exercícios.
 
-**Estado atual:** concepção e estruturação inicial. **Ainda não existe um jogo executável, motor validado ou integração funcional com o map.army.**
+**Estado atual:** primeiro protótipo de código publicado (backend FastAPI, frontend React, motor didático e testes). **Ainda não foi validado em execução neste ambiente**. Não há IA integrada, multijogador ou integração com map.army.
 
 ## Capacidades planejadas
 
@@ -66,7 +66,7 @@ O map.army é **referência e possível via de intercâmbio**. Integração auto
 
 ## Próximos passos
 
-Ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
+Para iniciar o protótipo, ver [docs/COMO_EXECUTAR.md](docs/COMO_EXECUTAR.md). Para planejar próximas entregas, ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Segurança e direitos
 
