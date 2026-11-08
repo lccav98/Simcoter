@@ -8,7 +8,7 @@
 
 O SIMCOTER é um projeto de plataforma **educacional** de planejamento e simulação de exercícios fictícios, inspirado em publicações públicas e autorizadas da doutrina do Exército Brasileiro. O projeto prevê treinamento **individual e multijogador**, em tablets e computadores comuns, por navegador, usando rede local e sem dependência da internet pública durante os exercícios.
 
-**Estado atual:** primeiro protótipo de código publicado (backend FastAPI, frontend React, motor didático e testes). **Ainda não foi validado em execução neste ambiente**. Há integração **opcional de código** com Ollama para resumos didáticos, mas ela não foi validada com modelo real; não há multijogador nem integração com map.army.
+**Estado atual:** primeiro protótipo de código publicado (backend FastAPI, frontend React, motor didático e testes). **Ainda não foi validado em execução neste ambiente**. Há integração **opcional de código** com Ollama para resumos didáticos, mas ela não foi validada com modelo real; ainda não há multijogador liberado nem integração com map.army.
 
 ## Capacidades planejadas
 
@@ -66,7 +66,7 @@ O map.army é **referência e possível via de intercâmbio**. Integração auto
 
 ## Próximos passos
 
-Para iniciar o protótipo, ver [docs/COMO_EXECUTAR.md](docs/COMO_EXECUTAR.md). O incremento 0.4 adiciona [tutor com IA local opcional](docs/TUTOR_IA_LOCAL.md), com saída estruturada, referência a evidências e modo de contingência sem IA. O incremento 0.3 incorpora [Motor Probabilístico de Simulação (MPS)](docs/MOTOR_PROBABILISTICO.md), sem Jev ou APIs pagas, para eventos fictícios e experimentação Monte Carlo. O incremento 0.2 adicionou [consulta de metadados doutrinários e problemas contextuais baseados em regras](docs/BIBLIOTECA_E_CONTEXTO.md); **a geração autônoma de problemas por IA ainda não está implementada**. O MPS não estima resultados reais de combate. Para planejar próximas entregas, ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
+Para iniciar o protótipo, ver [docs/COMO_EXECUTAR.md](docs/COMO_EXECUTAR.md). O incremento 0.5 adiciona [credenciais por partida, papéis e visões restritas](docs/ACESSO_E_PARTIDOS.md), ainda somente para localhost. O incremento 0.4 adiciona [tutor com IA local opcional](docs/TUTOR_IA_LOCAL.md), com saída estruturada, referência a evidências e modo de contingência sem IA. O incremento 0.3 incorpora [Motor Probabilístico de Simulação (MPS)](docs/MOTOR_PROBABILISTICO.md), sem Jev ou APIs pagas, para eventos fictícios e experimentação Monte Carlo. O incremento 0.2 adicionou [consulta de metadados doutrinários e problemas contextuais baseados em regras](docs/BIBLIOTECA_E_CONTEXTO.md); **a geração autônoma de problemas por IA ainda não está implementada**. O MPS não estima resultados reais de combate. Para planejar próximas entregas, ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Segurança e direitos
 
