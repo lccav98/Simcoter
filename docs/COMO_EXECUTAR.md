@@ -1,6 +1,6 @@
-# Como executar o primeiro protótipo
+# Como executar o SIMCOTER
 
-> Este é um **MVP didático individual**, não uma versão completa do SIMCOTER.
+> Este é um **MVP didático individual**, não uma versão completa do SIMCOTER. Para iniciar frontend e API em uma só origem, prefira o guia [EXECUTAR_V08.md](EXECUTAR_V08.md).
 > Requer Python 3.10+, Node.js 20+ e npm. A instalação inicial das dependências exige acesso aos respectivos repositórios; depois, o protótipo básico pode operar sem internet, desde que tudo esteja previamente instalado.
 
 ## 1. Baixar o código
