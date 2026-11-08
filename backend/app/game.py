@@ -12,7 +12,7 @@ from pathlib import Path
 from .probability import sample_transition, forecast
 from .access import issue_credentials, fingerprint, verify_fingerprint
 from .virtual_staff import create_proposal, coordinate, AGENTS
-from .readiness import unit_state, apply_training_variation, READINESS_VERSION, can_participate
+from .readiness import unit_state, apply_training_variation, READINESS_VERSION, can_participate, advance_turn
 
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
@@ -153,6 +153,8 @@ class GameStore:
             state["resources"] = transition["resources"]
             state["turn"] = turn
             state["events"].append(transition["event"])
+            state["units"], availability_events = advance_turn(state["units"], turn)
+            state["events"].extend(availability_events)
             self._save(db, state)
         return state
 
