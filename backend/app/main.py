@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +22,7 @@ from .virtual_staff import staff_catalog
 
 DB_PATH = os.getenv("SIMCOTER_DB", str(Path(__file__).resolve().parents[2] / "data" / "simcoter.sqlite3"))
 store = GameStore(DB_PATH)
-app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.6.0")
+app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.8.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -165,3 +167,22 @@ def review_staff_task(
 ):
     guard(session_id, authorization, instructor=True)
     return call(store.staff_review, session_id, task_id, body.action)
+
+
+# Servir o build Vite na mesma origem da API. A montagem só ocorre quando
+# o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
+DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+if (DIST_DIR / "index.html").is_file():
+    if (DIST_DIR / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="frontend-assets")
+
+    @app.get("/", include_in_schema=False)
+    def index_page():
+        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
+
+    @app.get("/{frontend_path:path}", include_in_schema=False)
+    def spa_page(frontend_path: str):
+        # Não devolver HTML para APIs ou recursos ausentes com extensão.
+        if frontend_path == "api" or frontend_path.startswith("api/") or Path(frontend_path).suffix:
+            raise HTTPException(status_code=404, detail="Recurso não encontrado")
+        return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
