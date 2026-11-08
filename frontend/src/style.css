@@ -129,3 +129,14 @@ footer{padding:28px 12px 14px;text-align:center;font-size:11px;color:#9cbbbd;let
 @media (prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* Navigação por áreas: mapa sempre visível, ferramentas sob demanda. */
+.workspace-nav{display:flex;align-items:center;gap:8px;overflow-x:auto;
+  padding:3px 0 14px;scrollbar-width:thin;scrollbar-color:#46646c transparent}
+.workspace-nav button{flex:none;background:#132a32;border:1px solid #38535c;
+  box-shadow:none;color:#bcd0d2;min-height:44px;font-size:12px;
+  padding:10px 17px;white-space:nowrap;font-weight:750}
+.workspace-nav button:hover:not(:disabled){background:#1c3c44;border-color:#7a9f9e}
+.workspace-nav button.selected{background:#d5a95b;color:#13262a;
+  border-color:#f2d99d;box-shadow:0 5px 14px rgba(213,169,91,.13)}
+.panel[hidden]{display:none!important}
