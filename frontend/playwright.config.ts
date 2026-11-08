@@ -1,5 +1,7 @@
 import { defineConfig } from "@playwright/test";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
+const localPython = fileURLToPath(new URL("../.venv/Scripts/python.exe", import.meta.url));
 
 export default defineConfig({
   testDir: "./e2e",
@@ -11,7 +13,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "chromium", use: { browserName: "chromium", viewport: { width: 1366, height: 900 } } },
+    { name: "chromium", use: { browserName: "chromium", channel: "chromium", viewport: { width: 1366, height: 900 } } },
     { name: "webkit-ipad", use: {
       browserName: "webkit",
       viewport: { width: 820, height: 1180 },
@@ -21,11 +23,11 @@ export default defineConfig({
     } },
   ],
   webServer: {
-    command: "python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000",
+    command: `"${existsSync(localPython) ? localPython : "python"}" -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000`,
     cwd: fileURLToPath(new URL("../", import.meta.url)),
     url: "http://127.0.0.1:8000/api/health",
     timeout: 30000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: { SIMCOTER_AI_ENABLED: "false" },
   },
 });

@@ -54,3 +54,7 @@ maps/packs/
 Thumbs.db
 .idea/
 .vscode/
+
+# Browser test artifacts
+frontend/test-results/
+frontend/playwright-report/

@@ -17,7 +17,7 @@ def test_agents_use_only_relevant_evidence(tmp_path):
         assert task["agent"] == role
         assert task["status"] == "proposed"
         assert "TEXTO RESERVADO" not in str(task)
-    assert set(create_proposal(state, "E4")["evidence"]) == {"resources", "turn"}
+    assert set(create_proposal(state, "E4")["evidence"]) == {"resources", "turn", "weather", "unavailable_count"}
     assert "reports" not in create_proposal(state, "E3")["evidence"]
 
 

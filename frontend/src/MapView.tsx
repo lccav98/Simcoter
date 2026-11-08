@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   createUnitMarker, symbolMarkup, safeKind, safeEchelon, readinessInfo,
@@ -76,7 +76,7 @@ export default function MapView({units,features,environment}:Props) {
 
   useEffect(()=>{
     if(!container.current||mapRef.current)return;
-    if(!maplibregl.supported()){
+    if(!document.createElement("canvas").getContext("webgl2")){
       setError("Este navegador não disponibiliza WebGL para o MapLibre.");
       return;
     }
@@ -89,7 +89,7 @@ export default function MapView({units,features,environment}:Props) {
           tileSize:256,maxzoom:19,attribution:"© OpenStreetMap contributors"}},
         layers:[{id:"osm-base-layer",type:"raster",source:"osm-base"}],
       },
-      center:ANCHOR,zoom:10.2,attributionControl:true,
+      center:ANCHOR,zoom:10.2,attributionControl:{},
     });
     mapRef.current=map;
     map.addControl(new maplibregl.NavigationControl({showZoom:true,showCompass:true}),"top-right");
