@@ -16,10 +16,11 @@ from .access import visible_state
 from .context import analyze_context
 from .doctrine import search_catalog
 from .local_ai import explain
+from .virtual_staff import staff_catalog
 
 DB_PATH = os.getenv("SIMCOTER_DB", str(Path(__file__).resolve().parents[2] / "data" / "simcoter.sqlite3"))
 store = GameStore(DB_PATH)
-app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.5.0")
+app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.6.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -132,3 +133,35 @@ def probability_preview(
 def ai_explanation(session_id: str, authorization: str | None = Header(default=None)):
     guard(session_id, authorization, instructor=True)
     return explain(call(store.get, session_id))
+
+
+class StaffAssignment(BaseModel):
+    agent: str = Field(min_length=2, max_length=2)
+
+
+class StaffReview(BaseModel):
+    action: str
+
+
+@app.get("/api/sessions/{session_id}/staff")
+def read_staff(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return {"catalog": staff_catalog(), **call(store.staff_summary, session_id)}
+
+
+@app.post("/api/sessions/{session_id}/staff/tasks")
+def assign_staff_task(
+    session_id: str, body: StaffAssignment,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.staff_assign, session_id, body.agent)
+
+
+@app.post("/api/sessions/{session_id}/staff/tasks/{task_id}/review")
+def review_staff_task(
+    session_id: str, task_id: str, body: StaffReview,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.staff_review, session_id, task_id, body.action)
