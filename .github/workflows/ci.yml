@@ -51,3 +51,28 @@ jobs:
           npm run build
       - name: Testar aplicativo unificado por HTTP local
         run: python scripts/smoke_integrated.py
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar backend do teste
+        run: python -m pip install -e '.[test]'
+      - name: Instalar frontend e Playwright
+        working-directory: frontend
+        run: |
+          npm install
+          npx playwright install --with-deps chromium webkit
+      - name: Compilar a aplicação
+        working-directory: frontend
+        run: npm run build
+      - name: Testar navegador desktop e WebKit tipo iPad
+        working-directory: frontend
+        run: npm run test:e2e
