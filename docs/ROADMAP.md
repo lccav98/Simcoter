@@ -14,7 +14,7 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [x] Código inicial de API FastAPI e banco SQLite (a validar)
 - [x] Cenário sintético e gestão individual de partidas (código inicial)
 - [ ] Mapa offline simples com unidades e calcos fictícios (SVG ilustrativo inicial, ainda sem PWA/tiles)
-- [x] Motor inicial determinístico e logística abstrata (a validar)
+- [x] Motor inicial determinístico com variabilidade probabilística contextual e logística abstrata (MPS 0.3, a validar)
 - [ ] Replay e APA básica (APA descritiva inicial implementada; replay pendente)
 
 ## M2 — Biblioteca e IA local
@@ -23,6 +23,7 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [ ] Ollama opcional com respostas verificáveis
 - [ ] Gerador contextual com schema e validador independente (propostas por regras objetivas já implementadas; validação de IA ainda pendente)
 - [ ] Testes contra contradições de cenário e citações falsas
+- [x] Motor MPS inicial: probabilidades fictícias, sementes reproduzíveis, ensaios de Monte Carlo, interface e testes (execução a verificar)
 
 ## M3 — Estado-Maior multijogador
 - [ ] PostgreSQL/PostGIS e WebSockets
