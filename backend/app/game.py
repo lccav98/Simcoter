@@ -11,6 +11,7 @@ from pathlib import Path
 
 from .probability import sample_transition, forecast
 from .access import issue_credentials, fingerprint, verify_fingerprint
+from .virtual_staff import create_proposal, coordinate, AGENTS
 
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
@@ -74,7 +75,7 @@ class GameStore:
             "id": str(uuid.uuid4()), "title": title.strip() or "Exercício Horizonte",
             "seed": seed, "turn": 0, "resources": INITIAL_RESOURCES.copy(),
             "units": UNITS, "features": [item.copy() for item in FEATURES],
-            "reports": [], "events": [], "created_at": utc_now(),
+            "reports": [], "events": [], "staff_tasks": [], "created_at": utc_now(),
             "scenario": "Território, organizações e parâmetros inteiramente fictícios.",
         }
         with self._lock, self._connect() as db:
@@ -151,6 +152,46 @@ class GameStore:
             state["events"].append(transition["event"])
             self._save(db, state)
         return state
+
+    def staff_assign(self, session_id: str, agent: str) -> dict:
+        """Nova tarefa documental para um integrante virtual; sem alterar o cenário."""
+        if agent not in AGENTS:
+            raise ValueError("Agente inexistente")
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            task = create_proposal(state, agent)
+            task.update({"id": str(uuid.uuid4()), "turn": state["turn"],
+                         "created_at": utc_now(), "reviewed_at": None})
+            state.setdefault("staff_tasks", []).append(task)
+            state["events"].append({
+                "kind": "staff_task_created", "turn": state["turn"], "ref": task["id"],
+                "agent": agent,
+            })
+            self._save(db, state)
+        return coordinate(state)
+
+    def staff_review(self, session_id: str, task_id: str, action: str) -> dict:
+        """Apenas a API de instrutor deverá expor esta mudança administrativa."""
+        if action not in {"approved", "rejected"}:
+            raise ValueError("Decisão inválida")
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            task = next((t for t in state.get("staff_tasks", []) if t["id"] == task_id), None)
+            if task is None:
+                raise KeyError("Tarefa inexistente")
+            if task["status"] != "proposed":
+                raise ValueError("Tarefa já revisada")
+            task["status"] = action
+            task["reviewed_at"] = utc_now()
+            state["events"].append({
+                "kind": "staff_task_reviewed", "turn": state["turn"],
+                "ref": task_id, "decision": action,
+            })
+            self._save(db, state)
+        return coordinate(state)
+
+    def staff_summary(self, session_id: str) -> dict:
+        return coordinate(self.get(session_id))
 
     def probability_preview(self, session_id: str, repetitions: int = 500) -> dict:
         state = self.get(session_id)
