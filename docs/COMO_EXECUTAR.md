@@ -70,6 +70,8 @@ npm run build
 - Progressão determinística dos indicadores logísticos abstratos;
 - Acontecimentos condicionados à situação simulada e reprodutíveis;
 - Geração de APA **descritiva**, vinculada aos eventos salvos.
+- Catálogo local inicial de referências, somente metadados, com busca por termos.
+- Propostas de problemas pedagógicos condicionadas a gatilhos objetivos da partida.
 
 ## 6. Limitações importantes
 
