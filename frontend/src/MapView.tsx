@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
-  createUnitMarker, symbolMarkup, safeKind, safeEchelon,
+  createUnitMarker, symbolMarkup, safeKind, safeEchelon, readinessInfo,
   unitDescription, KIND_LABELS, ECHELON_LABELS, PARTY_LABELS,
   type SimUnit, type Party, type UnitKind,
 } from "./militarySymbols";
@@ -53,7 +53,7 @@ export default function MapView({units,features}:Props) {
       .map(unit=>new maplibregl.Marker({
         element:createUnitMarker(unit),anchor:"center",
       }).setLngLat(unitCoordinates(unit))
-        .setPopup(new maplibregl.Popup({offset:18}).setText(unitDescription(unit)))
+        .setPopup(new maplibregl.Popup({offset:18}).setText(unitDescription(unit)+` · Índice didático: ${readinessInfo(unit).value}% (${readinessInfo(unit).label})`))
         .addTo(map));
   };
   const syncOverlays=(map:maplibregl.Map,items:Measure[],show:boolean)=>{
@@ -168,10 +168,10 @@ export default function MapView({units,features}:Props) {
         {units.map(unit=><div className="symbolLegendItem" key={unit.id}>
           <span className="symbolLegendIcon" aria-hidden="true"
             dangerouslySetInnerHTML={{__html:symbolMarkup(unit.party,safeKind(unit.kind),safeEchelon(unit.echelon))}}/>
-          <span>{unit.name}<small>{KIND_LABELS[safeKind(unit.kind)]} · {ECHELON_LABELS[safeEchelon(unit.echelon)]} · {PARTY_LABELS[unit.party]}</small></span>
+          <span>{unit.name}<small>{KIND_LABELS[safeKind(unit.kind)]} · {ECHELON_LABELS[safeEchelon(unit.echelon)]} · {PARTY_LABELS[unit.party]}</small><small className={"readiness-text "+readinessInfo(unit).status}>Índice didático: {readinessInfo(unit).value}% — {readinessInfo(unit).label}</small></span>
         </div>)}
       </div>
-      <p className="legendWarning">Ícones originais simplificados; não são símbolos militares certificados nem posições reais.</p>
+      <p className="legendWarning">Índice sintético de disponibilidade: acima de 50% disponível; de 26% a 50% atenção; 25% ou menos indisponível para ações simuladas. Não é uma medida real de poder de combate.</p><p className="legendWarning">Ícones originais simplificados; não são símbolos militares certificados nem posições reais.</p>
     </section>}
     {error&&<p className="mapError" role="alert">{error}</p>}
     <div className="mapDisclaimer">MapLibre GL JS · Base OSM online · Calcos e organizações inteiramente fictícios · Zoom +/− e pinça no iPad</div>
