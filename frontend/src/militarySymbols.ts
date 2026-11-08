@@ -12,6 +12,9 @@ export type SimUnit = {
   y:number;
   kind?:UnitKind;
   echelon?:Echelon;
+  readiness?:number;
+  readiness_status?:"disponivel"|"atencao"|"indisponivel";
+  available_for_simulated_actions?:boolean;
 };
 export const MILITARY_SYMBOL_REFERENCE = {
   title:"Biblioteca vetorial didática de organizações fictícias",
@@ -73,6 +76,12 @@ export function symbolMarkup(party:Party, kind:UnitKind, echelon:Echelon):string
 export function unitDescription(unit:SimUnit):string {
   return `${unit.name} — ${KIND_LABELS[safeKind(unit.kind)]}, ${ECHELON_LABELS[safeEchelon(unit.echelon)]}, partido ${PARTY_LABELS[unit.party]}`;
 }
+export function readinessInfo(unit:SimUnit):{value:number;status:"disponivel"|"atencao"|"indisponivel";label:string}{
+  const n=typeof unit.readiness==="number"&&Number.isFinite(unit.readiness)
+    ?Math.round(Math.max(0,Math.min(100,unit.readiness))):100;
+  const status=n<=25?"indisponivel":n<=50?"atencao":"disponivel";
+  return {value:n,status,label:status==="indisponivel"?"INDISPONÍVEL":status==="atencao"?"ATENÇÃO":"DISPONÍVEL"};
+}
 export function createUnitMarker(unit:SimUnit):HTMLElement {
   const wrapper=document.createElement("div");
   wrapper.className="military-unit-marker";
@@ -80,6 +89,11 @@ export function createUnitMarker(unit:SimUnit):HTMLElement {
   wrapper.setAttribute("aria-label",unitDescription(unit));
   wrapper.title=unitDescription(unit);
   // Campos não confiáveis não são interpolados como HTML. Apenas enums validados.
-  wrapper.innerHTML=symbolMarkup(unit.party,safeKind(unit.kind),safeEchelon(unit.echelon));
+  const readiness=readinessInfo(unit);
+  wrapper.classList.add("readiness-"+readiness.status);
+  wrapper.setAttribute("aria-label",unitDescription(unit)+`, índice didático ${readiness.value}%, ${readiness.label}`);
+  wrapper.innerHTML=symbolMarkup(unit.party,safeKind(unit.kind),safeEchelon(unit.echelon))+
+    `<span class="unit-readiness-badge" aria-hidden="true">${readiness.value}%</span>`+
+    `<span class="unit-readiness-track" aria-hidden="true"><span style="width:${readiness.value}%"></span></span>`;
   return wrapper;
 }
