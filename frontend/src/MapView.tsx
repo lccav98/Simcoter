@@ -8,17 +8,29 @@ import {
 } from "./militarySymbols";
 
 type Measure = {id:string;name:string;kind:string;status:"proposed"|"approved"};
-type Props = {units:SimUnit[];features:Measure[]};
-type Filters = {parties:Record<Party,boolean>;kinds:Record<UnitKind,boolean>;overlays:boolean};
+type TerrainZone = {id:string;label:string;grade:"restritivo"|"impeditivo";bounds:{x_min:number;x_max:number;y_min:number;y_max:number}};
+export type EnvironmentData = {weather:"normal"|"adverse"|"severe";weather_label:string;zones:TerrainZone[];version:string};
+type Props = {units:SimUnit[];features:Measure[];environment?:EnvironmentData|null};
+type Filters = {parties:Record<Party,boolean>;kinds:Record<UnitKind,boolean>;overlays:boolean;terrain:boolean};
 const ANCHOR:[number,number]=[-47.9292,-15.7801];
 const INITIAL_FILTERS:Filters = {
   parties:{azul:true,vermelha:true},
   kinds:{infantry:true,logistics:true,command:true,engineering:true,communications:true,medical:true,transport:true},
-  overlays:true,
+  overlays:true,terrain:true,
 };
 const unitCoordinates=(unit:SimUnit):[number,number]=>[
   ANCHOR[0]+(unit.x-50)*0.004,ANCHOR[1]-(unit.y-50)*0.004,
 ];
+function terrainGeometry(env:EnvironmentData|null|undefined,show:boolean) {
+  return {type:"FeatureCollection" as const,features:show?(env?.zones??[]).map(zone=>{
+    const b=zone.bounds;
+    const points:[[number,number],[number,number],[number,number],[number,number],[number,number]]=[
+      [b.x_min,b.y_min],[b.x_max,b.y_min],[b.x_max,b.y_max],[b.x_min,b.y_max],[b.x_min,b.y_min],
+    ];
+    return {type:"Feature" as const,properties:{grade:zone.grade,label:zone.label},
+      geometry:{type:"Polygon" as const,coordinates:[points.map(([x,y])=>[ANCHOR[0]+(x-50)*0.004,ANCHOR[1]-(y-50)*0.004])]}};
+  }):[]};
+}
 function overlays(features:Measure[],show:boolean) {
   const area=show&&features.some(f=>f.id==="area-azul"&&f.status==="approved");
   const point=show&&features.some(f=>f.id==="ponto-1"&&f.status==="approved");
@@ -36,15 +48,15 @@ function overlays(features:Measure[],show:boolean) {
   };
 }
 
-export default function MapView({units,features}:Props) {
+export default function MapView({units,features,environment}:Props) {
   const container=useRef<HTMLDivElement|null>(null);
   const mapRef=useRef<maplibregl.Map|null>(null);
   const markers=useRef<maplibregl.Marker[]>([]);
-  const latest=useRef({units,features,filters:INITIAL_FILTERS});
+  const latest=useRef({units,features,environment,filters:INITIAL_FILTERS});
   const [filters,setFilters]=useState<Filters>(INITIAL_FILTERS);
   const [legendOpen,setLegendOpen]=useState(false);
   const [error,setError]=useState("");
-  latest.current={units,features,filters};
+  latest.current={units,features,environment,filters};
 
   const syncMarkers=(map:maplibregl.Map,items:SimUnit[],f:Filters)=>{
     markers.current.forEach(m=>m.remove());
@@ -95,6 +107,13 @@ export default function MapView({units,features}:Props) {
       map.addLayer({id:"sim-point-symbol",type:"circle",source:"sim-point",
         paint:{"circle-color":"#eac170","circle-radius":11,
           "circle-stroke-color":"#664719","circle-stroke-width":2}});
+      map.addSource("sim-terrain",{type:"geojson",data:terrainGeometry(current.environment,current.filters.terrain)});
+      map.addLayer({id:"sim-terrain-fill",type:"fill",source:"sim-terrain",
+        paint:{"fill-color":["match",["get","grade"],"impeditivo","#ad4242","restritivo","#d0a657","#7e8e8e"],
+          "fill-opacity":0.16}});
+      map.addLayer({id:"sim-terrain-border",type:"line",source:"sim-terrain",
+        paint:{"line-color":["match",["get","grade"],"impeditivo","#9a2626","restritivo","#a37b34","#7e8e8e"],
+          "line-width":2,"line-dasharray":[3,2]}});
       syncMarkers(map,current.units,current.filters);
     });
     map.on("error",()=>setError("Falha ao carregar parte do mapa. Confira a conexão à internet."));
@@ -112,8 +131,9 @@ export default function MapView({units,features}:Props) {
     if(!map||!map.getSource("sim-area"))return;
     syncMarkers(map,units,filters);
     syncOverlays(map,features,filters.overlays);
+    (map.getSource("sim-terrain") as maplibregl.GeoJSONSource|undefined)?.setData(terrainGeometry(environment,filters.terrain));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[units,features,filters]);
+  },[units,features,environment,filters]);
 
   const visibleUnits=units.filter(u=>filters.parties[u.party]&&filters.kinds[safeKind(u.kind)]);
   const representedKinds=Array.from(new Set(units.map(u=>safeKind(u.kind))));
@@ -159,11 +179,15 @@ export default function MapView({units,features}:Props) {
         </fieldset>
         <fieldset>
           <legend>Camadas</legend>
+          <label><input type="checkbox" checked={filters.terrain}
+            onChange={e=>setFilters(f=>({...f,terrain:e.target.checked}))}/>
+            Terrenos fictícios impeditivos/restritivos</label>
           <label><input type="checkbox" checked={filters.overlays}
             onChange={e=>setFilters(f=>({...f,overlays:e.target.checked}))}/>
             Medidas gráficas aprovadas</label>
         </fieldset>
       </div>
+      {environment&&<p className="legendWarning">Condição climática do exercício: {environment.weather_label}. Áreas impeditivas bloqueiam deslocamentos, restritivas exigem revisão; não são classificações do terreno real.</p>}
       <div className="symbolLegendList">
         {units.map(unit=><div className="symbolLegendItem" key={unit.id}>
           <span className="symbolLegendIcon" aria-hidden="true"
