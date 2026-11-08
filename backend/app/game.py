@@ -21,9 +21,9 @@ TEACHING_EVENTS = [
     ("Demanda adicional de atendimento em exercício", "saude", 3),
 ]
 UNITS = [
-    {"id": "azul-1", "party": "azul", "name": "Organização Azul 1", "x": 23, "y": 36},
-    {"id": "azul-2", "party": "azul", "name": "Organização Azul 2", "x": 32, "y": 73},
-    {"id": "vermelha-1", "party": "vermelha", "name": "Organização Vermelha 1", "x": 78, "y": 44},
+    {"id": "azul-1", "party": "azul", "name": "Unidade fictícia Azul 1", "x": 23, "y": 36, "kind": "infantry", "echelon": "battalion"},
+    {"id": "azul-2", "party": "azul", "name": "Unidade fictícia Azul 2", "x": 32, "y": 73, "kind": "logistics", "echelon": "company"},
+    {"id": "vermelha-1", "party": "vermelha", "name": "Unidade fictícia Vermelha 1", "x": 78, "y": 44, "kind": "command", "echelon": "brigade"},
 ]
 FEATURES = [
     {"id": "area-azul", "name": "Área de responsabilidade Azul", "kind": "area", "status": "proposed"},
