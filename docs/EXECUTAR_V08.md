@@ -76,3 +76,27 @@ aplicação React+FastAPI hospedada**.
 Referências: [FastAPI](https://fastapi.tiangolo.com/),
 [MapLibre](https://maplibre.org/maplibre-gl-js/docs/),
 [OSM tile usage](https://operations.osmfoundation.org/policies/tiles/).
+
+
+## Verificação adicional — legenda, simbologia e navegador
+
+O MapLibre contém **Legenda e camadas** para filtrar unidades por partido,
+natureza cadastrada e medidas gráficas aprovadas. O catálogo original inclui
+sete naturezas didáticas e quatro escalões, sem declarar conformidade oficial.
+
+No ambiente de desenvolvimento, após instalar o frontend, podem ser executados:
+
+```bash
+cd frontend
+npx playwright install chromium webkit
+npm run test:e2e
+```
+
+O workflow do GitHub Actions inclui um job **browser** que instala Chromium e
+WebKit, compila a aplicação e executa testes de navegação, MapLibre, legenda e
+separação dos papéis. **Os resultados ainda não foram confirmados neste ambiente.**
+
+Existe também uma demonstração HTML independente com design Command Desk,
+símbolos SVG e legenda. Ela não contém o backend Python, não substitui os
+testes da aplicação integrada e precisa de internet para carregar o MapLibre
+por CDN e os tiles públicos do OpenStreetMap.
