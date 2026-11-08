@@ -6,7 +6,7 @@ O protótipo inclui:
 - mapa-base raster OpenStreetMap de visualização **online**;
 - controle visível de zoom (+ e −), bússola e escala métrica;
 - pan, rolagem e gesto de pinça em dispositivos sensíveis ao toque, conforme navegador;
-- marcadores GeoJSON para organizações inteiramente fictícias;
+- símbolos SVG originais em marcadores MapLibre, com campos de natureza, partido e escalão de unidades fictícias (ver [SIMBOLOGIA_MILITAR.md](SIMBOLOGIA_MILITAR.md));
 - medidas vetoriais GeoJSON (área e ponto) exibidas após aprovação;
 - interação por toque/click em marcador.
 
