@@ -8,7 +8,9 @@ O protótipo inclui:
 - pan, rolagem e gesto de pinça em dispositivos sensíveis ao toque, conforme navegador;
 - símbolos SVG originais em marcadores MapLibre, com campos de natureza, partido e escalão de unidades fictícias (ver [SIMBOLOGIA_MILITAR.md](SIMBOLOGIA_MILITAR.md));
 - medidas vetoriais GeoJSON (área e ponto) exibidas após aprovação;
-- interação por toque/click em marcador.
+- interação por toque/click em marcador;
+- **legenda interativa** com filtros por partido, natureza das unidades presentes e camadas de medidas aprovadas;
+- marcadores vetoriais originais, diferenciados por natureza e escalão, com rótulos descritivos acessíveis.
 
 ### Limites e direitos
 
