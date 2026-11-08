@@ -35,7 +35,8 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 
 ## M4 — Maturidade didática
 - [ ] Editor de exercícios e capacidades agregadas fictícias
-- [ ] Instrutor virtual e painel de acompanhamento
+- [ ] Instrutor virtual e painel de acompanhamento (EMV E1–E4 inicial com aprovação manual, interface e testes adicionados; execução a verificar)
+- [ ] Adaptador Paperclip opcional funcional (somente contrato e stub implementados na v0.6)
 - [ ] APA comparativa com rastreabilidade de evidências
 - [ ] Avaliação curricular e de acessibilidade
 - [ ] Benchmark, auditoria e validação por instrutores
