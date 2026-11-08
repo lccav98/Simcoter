@@ -10,12 +10,12 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [ ] Verificar direitos de uso de fontes doutrinárias e dados cartográficos
 
 ## M1 — Protótipo individual
-- [ ] Interface React/TypeScript responsiva
-- [ ] API FastAPI e banco SQLite
-- [ ] Cenário sintético e gestão de partidas
-- [ ] Mapa offline simples com unidades e calcos fictícios
-- [ ] Motor determinístico de eventos e logística abstrata
-- [ ] Replay e APA básica
+- [x] Código inicial de interface React/TypeScript responsiva (a validar)
+- [x] Código inicial de API FastAPI e banco SQLite (a validar)
+- [x] Cenário sintético e gestão individual de partidas (código inicial)
+- [ ] Mapa offline simples com unidades e calcos fictícios (SVG ilustrativo inicial, ainda sem PWA/tiles)
+- [x] Motor inicial determinístico e logística abstrata (a validar)
+- [ ] Replay e APA básica (APA descritiva inicial implementada; replay pendente)
 
 ## M2 — Biblioteca e IA local
 - [ ] Catálogo doutrinário com fonte/edição/permissões
