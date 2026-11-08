@@ -41,6 +41,8 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [x] Testes de API adicionados para negar acesso entre partidos e restringir ações de instrutor (execução CI a validar)
 
 ## M4 — Maturidade didática
+- [x] Efeitos sonoros sintéticos do frontend: rotina, ocorrência fictícia e prévia de embate acionada manualmente, com controle de volume e silêncio (Safari iPad ainda a validar)
+- [ ] Vincular áudio de embates apenas quando um futuro motor registrar eventos desse tipo
 - [ ] Editor de exercícios e capacidades agregadas fictícias
 - [ ] Instrutor virtual e painel de acompanhamento (EMV E1–E4 inicial com aprovação manual, interface e testes adicionados; execução a verificar)
 - [ ] Adaptador Paperclip opcional funcional (somente contrato e stub implementados na v0.6)
