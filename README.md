@@ -66,7 +66,7 @@ O map.army é **referência e possível via de intercâmbio**. Integração auto
 
 ## Próximos passos
 
-Para iniciar o protótipo, ver [docs/COMO_EXECUTAR.md](docs/COMO_EXECUTAR.md). O incremento 0.2 adicionou [consulta de metadados doutrinários e problemas contextuais baseados em regras](docs/BIBLIOTECA_E_CONTEXTO.md); **a IA generativa continua não integrada**. Para planejar próximas entregas, ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
+Para iniciar o protótipo, ver [docs/COMO_EXECUTAR.md](docs/COMO_EXECUTAR.md). O incremento 0.3 incorpora [Motor Probabilístico de Simulação (MPS)](docs/MOTOR_PROBABILISTICO.md), sem Jev ou APIs pagas, para eventos fictícios e experimentação Monte Carlo. O incremento 0.2 adicionou [consulta de metadados doutrinários e problemas contextuais baseados em regras](docs/BIBLIOTECA_E_CONTEXTO.md); **a IA generativa continua não integrada**. O MPS não estima resultados reais de combate. Para planejar próximas entregas, ver [ARQUITETURA.md](ARQUITETURA.md), [REQUISITOS.md](REQUISITOS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Segurança e direitos
 
