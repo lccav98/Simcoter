@@ -199,3 +199,30 @@ footer{padding:28px 12px 14px;text-align:center;font-size:11px;color:#9cbbbd;let
  .audioControls button:last-child{grid-column:span 2}}
 @media(max-width:600px){.audioControls{grid-template-columns:1fr}
  .audioControls button:last-child{grid-column:auto}}
+
+/* Calungas: indicador permanente de prontidão DIDÁTICA (não poder real). */
+.military-unit-marker{height:77px;min-width:76px;overflow:visible;flex-direction:column;gap:0}
+.military-unit-marker svg{height:55px;flex:0 0 55px}
+.unit-readiness-badge{display:block;min-width:52px;padding:1px 7px;border:1px solid #4f806e;
+  border-radius:6px;background:#113c37;color:#e4ffec;text-align:center;font-size:12px;
+  line-height:17px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:.03em}
+.unit-readiness-track{display:block;width:55px;height:5px;margin-top:2px;
+  border:1px solid #1b3031;background:#a8bdc0;border-radius:4px;overflow:hidden}
+.unit-readiness-track>span{display:block;height:100%;background:#53c2a3}
+.military-unit-marker.readiness-atencao .unit-readiness-badge{background:#563e17;border-color:#b79036;color:#ffdf8f}
+.military-unit-marker.readiness-atencao .unit-readiness-track>span{background:#ecbd4d}
+.military-unit-marker.readiness-indisponivel{opacity:.92;filter:grayscale(.35) drop-shadow(0 3px 3px rgba(0,0,0,.3))}
+.military-unit-marker.readiness-indisponivel .unit-readiness-badge{background:#572b2f;border-color:#ba6b6d;color:#ffe4de}
+.military-unit-marker.readiness-indisponivel .unit-readiness-track>span{background:#d17b7d}
+.readiness-text{display:block;font-weight:800;margin-top:5px}
+.readiness-text.disponivel{color:#90dfc6}
+.readiness-text.atencao{color:#f8d18b}
+.readiness-text.indisponivel{color:#f3a5a5}
+.unitStatusRow{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:10px;
+  border-top:1px solid #3a555b;padding:12px 2px}
+.unitStatusRow strong{font-size:13px}
+.unitStatusRow small{display:block;color:#b8cbd0;margin-top:5px;font-size:11px}
+.unitStatusActions{display:flex;gap:6px}
+.unitStatusActions button{font-size:12px;padding:6px 9px;min-height:40px}
+.unitStatusLabel{font-weight:800;font-size:12px;font-variant-numeric:tabular-nums}
+@media(max-width:900px){.military-unit-marker{height:82px;min-width:80px}}
