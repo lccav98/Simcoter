@@ -130,6 +130,7 @@ test("prontidão no calunga e regras ambientais visíveis para instrutor", async
   await expect(page.getByText(/Suspensão climática fictícia/)).toBeVisible();
 
   await page.getByRole("button",{name:"Estado-Maior",exact:true}).click();
+  await page.getByLabel("Agente virtual").selectOption("E3");
   await page.getByRole("button",{name:"Solicitar análise"}).click();
   await expect(page.getByText(/clima didático: severe/)).toBeVisible();
 });

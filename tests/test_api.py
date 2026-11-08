@@ -110,3 +110,20 @@ def test_ai_endpoint_fallback_without_external_service(tmp_path, monkeypatch):
     assert response.json()["available"] is False
     after = client.get(f"/api/sessions/{session_id}", headers=headers["instrutor"]).json()
     assert before == after
+
+def test_mutations_preserve_authenticated_instructor_role(tmp_path, monkeypatch):
+    client, sid, headers = setup_session(tmp_path, monkeypatch)
+    state = client.get(f"/api/sessions/{sid}", headers=headers["instrutor"]).json()
+    unit_id = state["units"][0]["id"]
+    actions = [
+        ("turns", {}),
+        ("features/ponto-1/approve", {}),
+        (f"units/{unit_id}/readiness", {"change": -1}),
+        ("environment/weather", {"weather": "normal"}),
+    ]
+    for path, body in actions:
+        response = client.post(f"/api/sessions/{sid}/{path}", json=body, headers=headers["instrutor"])
+        assert response.status_code == 200
+        assert response.json()["role"] == "instrutor"
+        denied = client.post(f"/api/sessions/{sid}/{path}", json=body, headers=headers["azul"])
+        assert denied.status_code == 403

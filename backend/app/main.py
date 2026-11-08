@@ -95,13 +95,13 @@ def add_report(session_id: str, body: NewReport, authorization: str | None = Hea
 @app.post("/api/sessions/{session_id}/turns")
 def next_turn(session_id: str, authorization: str | None = Header(default=None)):
     guard(session_id, authorization, instructor=True)
-    return call(store.next_turn, session_id)
+    return visible_state(call(store.next_turn, session_id), "instrutor")
 
 
 @app.post("/api/sessions/{session_id}/features/{feature_id}/approve")
 def approve_feature(session_id: str, feature_id: str, authorization: str | None = Header(default=None)):
     guard(session_id, authorization, instructor=True)
-    return call(store.approve_feature, session_id, feature_id)
+    return visible_state(call(store.approve_feature, session_id, feature_id), "instrutor")
 
 
 @app.get("/api/sessions/{session_id}/apa")
@@ -179,7 +179,7 @@ def review_unit_readiness(
     authorization: str | None = Header(default=None),
 ):
     guard(session_id, authorization, instructor=True)
-    return call(store.unit_readiness, session_id, unit_id, body.change)
+    return visible_state(call(store.unit_readiness, session_id, unit_id, body.change), "instrutor")
 
 
 @app.get("/api/sessions/{session_id}/units/{unit_id}/availability")
@@ -217,7 +217,7 @@ def update_weather(
     authorization: str | None = Header(default=None),
 ):
     guard(session_id, authorization, instructor=True)
-    return call(store.change_weather, session_id, body.weather)
+    return visible_state(call(store.change_weather, session_id, body.weather), "instrutor")
 
 
 @app.post("/api/sessions/{session_id}/units/{unit_id}/movement/check")
@@ -236,8 +236,8 @@ def apply_movement(
     authorization: str | None = Header(default=None),
 ):
     guard(session_id, authorization, instructor=True)
-    return call(store.move_unit, session_id, unit_id,
-                body.x, body.y, body.authorized)
+    return visible_state(call(store.move_unit, session_id, unit_id,
+                body.x, body.y, body.authorized), "instrutor")
 
 
 # Servir o build Vite na mesma origem da API. A montagem só ocorre quando

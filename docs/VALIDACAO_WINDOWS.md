@@ -17,3 +17,7 @@ Testes: .venv\Scripts\python.exe -m pytest -q
 Em frontend: npx playwright install chromium webkit; npm run test:e2e
 
 Pendências: solucionar lançamento dos navegadores e validar interface; WebKit/iPad; cartografia offline licenciada; IA local com modelo real. A base atual ainda usa tiles externos. Não houve integração de dados militares reais, alteração de permissões ou exposição em LAN/internet.
+
+## Continuação validada
+50 testes Python e 16 testes Playwright (Chromium headless e WebKit com viewport iPad) passaram. Corrigida perda de role nas respostas de mutação da API e teste de clima selecionando E3. Inicializador Windows executado até Uvicorn em 127.0.0.1:8000, com build e HTTP 200 confirmados. Corrigida saída silenciosa quando .venv já existia. Cartografia offline e Ollama real permanecem pendentes. WebKit não substitui teste em iPad físico.
+

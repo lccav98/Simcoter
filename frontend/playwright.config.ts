@@ -13,7 +13,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "chromium", use: { browserName: "chromium", channel: "chromium", viewport: { width: 1366, height: 900 } } },
+    { name: "chromium", use: { browserName: "chromium", viewport: { width: 1366, height: 900 } } },
     { name: "webkit-ipad", use: {
       browserName: "webkit",
       viewport: { width: 820, height: 1180 },
