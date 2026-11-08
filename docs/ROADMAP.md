@@ -14,10 +14,12 @@ Nenhum marco abaixo deve ser interpretado como concluído apenas por existir est
 - [x] Scripts Windows/Linux/macOS para preparar e executar o protótipo
 - [x] Teste automatizado de fluxo integrado por HTTP local (execução a confirmar)
 - [ ] Implantação autenticada HTTPS para acesso no Safari do iPad e testes reais de toque/WebGL
+- [x] Design system inicial responsivo e navegação por áreas; simbologia vetorial original com metadados de tipo e escalão
+- [ ] Curadoria e verificação de conformidade ao MD33-M-02 / MD33-C-01 e catálogo SIDC
 - [x] Código inicial de interface React/TypeScript responsiva (a validar)
 - [x] Código inicial de API FastAPI e banco SQLite (a validar)
 - [x] Cenário sintético e gestão individual de partidas (código inicial)
-- [ ] Mapa offline simples com unidades e calcos fictícios (SVG ilustrativo inicial, ainda sem PWA/tiles)
+- [ ] Mapa offline completo com cartas e calcos fictícios (MapLibre online e símbolos vetoriais de unidades já implementados; sem pacote de tiles offline)
 - [x] Motor inicial determinístico com variabilidade probabilística contextual e logística abstrata (MPS 0.3, a validar)
 - [ ] Replay e APA básica (APA descritiva inicial implementada; replay pendente)
 
