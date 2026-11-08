@@ -88,6 +88,10 @@
 | RF-60 | O | Parâmetros de planejamento com fonte/edição e sem reprodução de capacidade sensível |
 | RF-61 | O | Indicadores de recursos fictícios sem previsão de eficácia real |
 | RF-62 | E | Recursos didáticos de acessibilidade e adaptação de dificuldade |
+| RF-63 | O | Motor probabilístico offline de eventos fictícios, condicionado ao estado do cenário |
+| RF-64 | O | Sorteio reproduzível por semente, turno e versão de regra |
+| RF-65 | O | Ensaios Monte Carlo do próximo turno sem alterar a partida |
+| RF-66 | O | Documentar distribuições, limites e incerteza sem extrapolação para combate real |
 
 ## Critérios de aceite de primeira versão (MVP)
 
