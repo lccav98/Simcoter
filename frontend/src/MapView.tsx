@@ -82,7 +82,8 @@ export default function MapView({units,features}:Props) {
     mapRef.current=map;
     map.addControl(new maplibregl.NavigationControl({showZoom:true,showCompass:true}),"top-right");
     map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
-    map.once("load",()=>{
+    // style.load independe do download efetivo dos tiles públicos.
+    map.once("style.load",()=>{
       const current=latest.current;
       const data=overlays(current.features,current.filters.overlays);
       map.addSource("sim-area",{type:"geojson",data:data.area});
