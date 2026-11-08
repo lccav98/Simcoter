@@ -83,7 +83,7 @@ MapLibre com dados offline e licença compatível; mapa vetorial/tiles distribu�
 
 ## 9. Segurança, privacidade e direitos
 
-Autenticação local, controle por papel e por partido, trilhas de auditoria, backups, integridade dos pacotes, proteção de dados pessoais, segregação do material do instrutor, revisão de licenças e exclusão de informação operacional restrita. Dados de exercícios são sintéticos.
+Controle experimental com tokens de partida e visões filtradas; autenticação individual, controle robusto por partido, trilhas de auditoria, backups, integridade dos pacotes, proteção de dados pessoais, segregação do material do instrutor, revisão de licenças e exclusão de informação operacional restrita. Dados de exercícios são sintéticos.
 
 ## 10. Qualidade e testes
 
