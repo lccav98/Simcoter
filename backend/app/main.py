@@ -249,6 +249,25 @@ def save_preparation(session_id: str, body: Preparation, authorization: str | No
     return visible_state(call(store.prepare, session_id, body.model_dump()), "instrutor")
 
 
+from fastapi import Request
+from starlette.concurrency import run_in_threadpool
+from .pdf_import import extract_pdf, MAX_BYTES
+
+
+@app.post("/api/sessions/{session_id}/document-preview")
+async def document_preview(session_id: str, request: Request, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > MAX_BYTES:
+            raise HTTPException(413, "PDF excede 2 MB")
+    try:
+        return await run_in_threadpool(extract_pdf, bytes(data))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
 # Servir o build Vite na mesma origem da API. A montagem só ocorre quando
 # o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
 DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
