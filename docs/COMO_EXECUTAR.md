@@ -1,6 +1,6 @@
 # Como executar o SIMCOTER
 
-> Este é um **MVP didático individual**, não uma versão completa do SIMCOTER. Para iniciar frontend e API em uma só origem, prefira o guia [EXECUTAR_V08.md](EXECUTAR_V08.md).
+> Este é um **MVP didático individual**, não uma versão completa do SIMCOTER. Para iniciar frontend e API em uma só origem, prefira o guia [INSTALACAO_COMPUTADOR.md](INSTALACAO_COMPUTADOR.md), com o arquivo INICIAR_SIMCOTER.cmd no Windows. Complementos técnicos: [EXECUTAR_V08.md](EXECUTAR_V08.md) e [TERRENO_CLIMA_PRONTIDAO.md](TERRENO_CLIMA_PRONTIDAO.md).
 > Requer Python 3.10+, Node.js 20+ e npm. A instalação inicial das dependências exige acesso aos respectivos repositórios; depois, o protótipo básico pode operar sem internet, desde que tudo esteja previamente instalado.
 
 ## 1. Baixar o código
