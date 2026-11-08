@@ -75,6 +75,7 @@ npm run build
 - Motor Probabilístico de Simulação (MPS) com eventos condicionados e efeitos abstratos, e painel de repetições Monte Carlo do próximo turno.
 - Consulta `GET /api/sessions/{id}/probability?repetitions=500` não altera os dados da partida.
 - Tutor opcional: `GET /api/sessions/{id}/ai/explanation`, com fallback sem IA e sem alteração de estado.
+- Estado-Maior Virtual (EMV): painel E1–E4 para criar e aprovar tarefas de revisão documental. Consulte [ESTADO_MAIOR_VIRTUAL.md](ESTADO_MAIOR_VIRTUAL.md).
 
 ## 6. Limitações importantes
 
@@ -87,6 +88,6 @@ npm run build
 
 ## 7. Próximos incrementos
 
-Primeiro, endurecer os contratos de API, incluir autenticação, testes de acesso e separação por partido; depois, mapas locais com licença compatível, integração opcional Ollama e suporte à LAN com autorização por perfil.
+Próximas prioridades: autenticação individual, revogação de tokens, testes da versão 0.6, isolamento em LAN, integração opcional do modelo local com os agentes e avaliação de um adaptador Paperclip. Depois, cartografia offline licenciada.
 
 Documentação de tecnologias: [FastAPI](https://fastapi.tiangolo.com/), [Vite](https://vite.dev/guide/), [pytest](https://docs.pytest.org/).
