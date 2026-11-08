@@ -27,6 +27,12 @@ A interface deve parecer uma ferramenta profissional de análise e simulação e
 
 O sistema usa fontes de interface do próprio dispositivo; não envia solicitações de fontes para CDNs.
 
+## Legenda e filtros no MapLibre
+
+A barra do mapa inclui a ação **Legenda e camadas**, que abre um painel integrado ao mapa. O painel informa o número de unidades visíveis e permite filtrar por partido, natureza e medidas aprovadas. Os símbolos aparecem em uma legenda de amostras com nome, natureza e escalão. O painel foi dimensionado para toque e mantém o mapa visível durante a interação.
+
+Os filtros atuam somente sobre as entidades que o backend autorizou; não devem ser confundidos com mecanismos de autorização ou de ocultação segura de dados.
+
 ## Interação e acessibilidade
 
 - Controles principais com altura mínima de 44 px e foco visível de alto contraste.
