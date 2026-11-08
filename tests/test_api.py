@@ -27,3 +27,18 @@ def test_missing_game(tmp_path, monkeypatch):
     monkeypatch.setattr(main, "store", GameStore(tmp_path / "api.sqlite3"))
     client = TestClient(main.app)
     assert client.get("/api/sessions/inexistente").status_code == 404
+
+
+def test_ai_endpoint_fallback_without_external_service(tmp_path, monkeypatch):
+    monkeypatch.setattr(main, "store", GameStore(tmp_path / "ai.sqlite3"))
+    monkeypatch.setenv("SIMCOTER_AI_ENABLED", "false")
+    client = TestClient(main.app)
+    created = client.post("/api/sessions", json={}).json()
+    session_id = created["id"]
+    before = client.get(f"/api/sessions/{session_id}").json()
+    response = client.get(f"/api/sessions/{session_id}/ai/explanation")
+    assert response.status_code == 200
+    assert response.json()["mode"] == "rules_fallback"
+    assert response.json()["available"] is False
+    after = client.get(f"/api/sessions/{session_id}").json()
+    assert before == after
