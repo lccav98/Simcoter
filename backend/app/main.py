@@ -186,3 +186,29 @@ if (DIST_DIR / "index.html").is_file():
         if frontend_path == "api" or frontend_path.startswith("api/") or Path(frontend_path).suffix:
             raise HTTPException(status_code=404, detail="Recurso não encontrado")
         return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})
+
+
+class ReadinessUpdate(BaseModel):
+    change: int = Field(ge=-100, le=100)
+
+
+@app.post("/api/sessions/{session_id}/units/{unit_id}/readiness")
+def review_unit_readiness(
+    session_id: str, unit_id: str, body: ReadinessUpdate,
+    authorization: str | None = Header(default=None),
+):
+    guard(session_id, authorization, instructor=True)
+    return call(store.unit_readiness, session_id, unit_id, body.change)
+
+
+@app.get("/api/sessions/{session_id}/units/{unit_id}/availability")
+def check_unit_availability(
+    session_id: str, unit_id: str,
+    authorization: str | None = Header(default=None),
+):
+    role = guard(session_id, authorization)
+    state = call(store.get, session_id)
+    unit = next((u for u in state["units"] if u["id"] == unit_id), None)
+    if unit is None or (role != "instrutor" and unit["party"] != role):
+        raise HTTPException(status_code=404, detail="Unidade não encontrada")
+    return call(store.validate_unit_action, session_id, unit_id)
