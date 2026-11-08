@@ -27,3 +27,5 @@ Atualização: base sintética offline validada; 18 testes Playwright e 51 Pytho
 Pacotes locais: build aprovado, 22 testes Playwright e 53 testes Python passaram. Diagnóstico Ollama executado: indisponível, geração real não validada. Importação limitada a linhas fictícias com metadados declarados de licença, sem upload ou persistência.
 
 IA real qwen3.5:4b validada em banco temporário pela rota autenticada: 2,22 s, estado inalterado, acesso 401/403 verificado. 53 testes Python passaram. Servidor local reiniciado com IA ativa e modelo explícito.
+
+Preparação e biblioteca histórica: build aprovado, 55 testes Python e 24 Playwright passaram. Avisos conhecidos: depreciação Starlette/httpx e tamanho do bundle. Escopo e limitações em PREPARACAO_EXERCICIO.md.

@@ -240,6 +240,15 @@ def apply_movement(
                 body.x, body.y, body.authorized), "instrutor")
 
 
+from .preparation import Preparation
+
+
+@app.post("/api/sessions/{session_id}/preparation")
+def save_preparation(session_id: str, body: Preparation, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return visible_state(call(store.prepare, session_id, body.model_dump()), "instrutor")
+
+
 # Servir o build Vite na mesma origem da API. A montagem só ocorre quando
 # o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
 DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"

@@ -116,6 +116,31 @@ class GameStore:
         with self._lock, self._connect() as db:
             return self._load(db, session_id)
 
+    def prepare(self, session_id: str, payload: dict) -> dict:
+        from .preparation import review
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            if state["turn"] != 0:
+                raise ValueError("Preparação inicial bloqueada após o primeiro turno")
+            previous = state.get("preparation", {})
+            if payload["revision"] != previous.get("revision", 0):
+                raise ValueError("Revisão desatualizada; recarregue a partida")
+            record = dict(payload)
+            record["revision"] += 1
+            record["status"] = "approved" if record.pop("action") == "approve" else "draft"
+            record["gaps"] = review(record)
+            record["updated_at"] = utc_now()
+            if record["status"] == "approved":
+                if record["gaps"]:
+                    raise ValueError("Resolva as lacunas documentais antes de aprovar")
+                state["units"] = unit_state(record["units"])
+            state["preparation"] = record
+            state.setdefault("preparation_history", []).append(record.copy())
+            state["events"].append({"kind": "preparation", "turn": 0,
+                                    "revision": record["revision"], "status": record["status"]})
+            self._save(db, state)
+            return state
+
     def report(self, session_id: str, source: str, message: str, party: str) -> dict:
         if party not in {"azul", "vermelha", "instrutor"}:
             raise ValueError("Partido inválido")
