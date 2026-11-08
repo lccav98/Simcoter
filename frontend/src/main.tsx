@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 import MapView from "./MapView";
+import { GameAudio } from "./gameAudio";
 
 type Resource = "suprimentos" | "manutencao" | "transporte" | "saude";
 type Unit = {id:string;party:"azul"|"vermelha";name:string;x:number;y:number};
@@ -26,6 +27,11 @@ async function request<T>(url:string, method="GET", body?:unknown):Promise<T> {
 }
 function App(){
  const [data,setData]=useState<Session|null>(null);
+ const audioRef=useRef<GameAudio|null>(null);
+ if(!audioRef.current)audioRef.current=new GameAudio();
+ const [soundEnabled,setSoundEnabled]=useState(false);
+ const [soundVolume,setSoundVolume]=useState(28);
+ const [audioInfo,setAudioInfo]=useState("");
  const [staff,setStaff]=useState<StaffView|null>(null);
  const [activeView,setActiveView]=useState<"situacao"|"planejamento"|"emv"|"avaliacao">("situacao");
  const [agent,setAgent]=useState("E1");
@@ -44,12 +50,36 @@ function App(){
  const [party,setParty]=useState("azul");
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
+ useEffect(()=>{audioRef.current?.configure(soundEnabled,soundVolume/100)},[soundEnabled,soundVolume]);
+ useEffect(()=>()=>{void audioRef.current?.close()},[]);
  useEffect(()=>{const id=sessionStorage.getItem("simcoter-session");const token=sessionStorage.getItem("simcoter-token");if(id&&token)request<Session>(`/api/sessions/${id}`).then(setData).catch(()=>{sessionStorage.removeItem("simcoter-session");sessionStorage.removeItem("simcoter-token")})},[]);
  async function apply(action:()=>Promise<Session>){setBusy(true);setError("");try{const next=await action();setData(next);setApa(null);setContext(null);setProbability(null);setAiExplanation(null);setStaff(null);setActiveView("situacao");sessionStorage.setItem("simcoter-session",next.id)}catch(e){setError(String(e))}finally{setBusy(false)}}
  const create=async()=>{setBusy(true);setError("");try{const created=await request<CreatedSession>("/api/sessions","POST",{title:"Exercício Horizonte",seed:2026});setNewCredentials(created.credentials);sessionStorage.setItem("simcoter-token",created.credentials.instrutor);sessionStorage.setItem("simcoter-session",created.session.id);setData(created.session);setApa(null);setContext(null);setProbability(null);setAiExplanation(null);setStaff(null)}catch(e){setError(String(e))}finally{setBusy(false)}};
  const join=async()=>{if(!joinId.trim()||!joinToken.trim())return;setBusy(true);setError("");try{sessionStorage.setItem("simcoter-token",joinToken.trim());const joined=await request<Session>(`/api/sessions/${encodeURIComponent(joinId.trim())}`);sessionStorage.setItem("simcoter-session",joined.id);setData(joined);setNewCredentials(null);setApa(null);setContext(null);setProbability(null);setAiExplanation(null)}catch(e){sessionStorage.removeItem("simcoter-token");setError(String(e))}finally{setBusy(false)}};
  const leave=()=>{sessionStorage.removeItem("simcoter-token");sessionStorage.removeItem("simcoter-session");setData(null);setNewCredentials(null);setApa(null);setContext(null);setProbability(null);setAiExplanation(null);setStaff(null)};
- const turn=()=>data&&apply(()=>request(`/api/sessions/${data.id}/turns`,"POST"));
+ const turn=()=>{if(!data)return;const session=data;
+   // desbloqueia áudio dentro do clique, antes da resposta assíncrona da API.
+   if(soundEnabled)void audioRef.current?.unlock();
+   void apply(async()=>{
+     const next=await request<Session>(`/api/sessions/${session.id}/turns`,"POST");
+     if(soundEnabled){
+       const latest=next.events[next.events.length-1];
+       audioRef.current?.play(latest?.kind==="scenario_event"?"incident":"routine");
+     }
+     return next;
+   });
+ };
+ const enableSound=()=>{const next=!soundEnabled;setSoundEnabled(next);
+   audioRef.current?.configure(next,soundVolume/100);
+   if(next)void audioRef.current?.unlock().then(ok=>setAudioInfo(ok?"Áudio ativado":"Áudio indisponível neste navegador."));
+   else setAudioInfo("Áudio silenciado.");
+ };
+ const previewSound=()=>{if(!soundEnabled){setAudioInfo("Ative o som para ouvir a prévia.");return}
+   void audioRef.current?.unlock().then(ok=>{
+     if(ok){audioRef.current?.play("engagement_preview");setAudioInfo("Prévia sonora fictícia reproduzida; nenhum embate foi criado.")}
+     else setAudioInfo("Áudio indisponível. Verifique as permissões do navegador.");
+   });
+ };
  const approve=(id:string)=>data&&apply(()=>request(`/api/sessions/${data.id}/features/${id}/approve`,"POST"));
  const report=()=>{if(!data||!message.trim())return;apply(()=>request(`/api/sessions/${data.id}/reports`,"POST",{source,message,...(data.role==="instrutor"?{party}:{})}));setMessage("")};
  const loadApa=async()=>{if(data){setError("");try{setApa(await request(`/api/sessions/${data.id}/apa`))}catch(e){setError(String(e))}}};
@@ -64,6 +94,22 @@ function App(){
   <header className="top"><div><small>Protótipo educacional local · v0.8</small><h1>SIMCOTER</h1><p>Sistema Integrado de Modelagem e Condução de Operações Terrestres</p></div><button onClick={data?leave:create} disabled={busy}>{data?"Sair da sessão":"Criar exercício"}</button></header>
   {!data?<section className="panel"><h2>Exercício Horizonte</h2><p>Crie um exercício fictício ou acesse uma partida com o identificador e token fornecidos pelo instrutor. Proteção experimental, somente para uso local.</p><button onClick={create} disabled={busy}>Criar partida individual</button><h3>Entrar em uma partida</h3><div className="form"><label>Identificador da partida<input value={joinId} onChange={e=>setJoinId(e.target.value)}/></label><label>Token do participante<input type="password" value={joinToken} onChange={e=>setJoinToken(e.target.value)}/></label><button disabled={busy||!joinId.trim()||!joinToken.trim()} onClick={join}>Entrar</button></div></section>:
    <><div className="panel"><strong>Papel: {data.role??"instrutor"}</strong> · Partida: <code>{data.id}</code>{newCredentials&&<div className="apa"><p><strong>Credenciais exibidas somente agora:</strong> copie e guarde em local seguro. Compartilhe cada token apenas com seu destinatário.</p>{Object.entries(newCredentials).map(([name,token])=><p key={name}><strong>{name}</strong> — <code className="token">{token}</code> <button onClick={()=>navigator.clipboard.writeText(token)}>Copiar token</button></p>)}<button onClick={()=>setNewCredentials(null)}>Já salvei as credenciais</button></div>}</div><nav className="workspace-nav" aria-label="Áreas do exercício"><button className={activeView==="situacao"?"selected":""} aria-current={activeView==="situacao"?"page":undefined} onClick={()=>setActiveView("situacao")}>Situação</button>{data.role==="instrutor"&&<button className={activeView==="planejamento"?"selected":""} aria-current={activeView==="planejamento"?"page":undefined} onClick={()=>setActiveView("planejamento")}>Planejamento</button>}{data.role==="instrutor"&&<button className={activeView==="emv"?"selected":""} aria-current={activeView==="emv"?"page":undefined} onClick={()=>setActiveView("emv")}>Estado-Maior</button>}<button className={activeView==="avaliacao"?"selected":""} aria-current={activeView==="avaliacao"?"page":undefined} onClick={()=>setActiveView("avaliacao")}>{data.role==="instrutor"?"Avaliação e biblioteca":"Biblioteca"}</button></nav><div className="layout"><section className="panel mapPanel"><div className="heading"><h2>{data.title}</h2><span>Turno {data.turn}/20</span></div><MapView units={data.units} features={data.features}/><div className="legend"><span>■ Azul</span><span>■ Vermelho</span><span>Controles + e − para zoom · arraste e gesto de pinça no iPad</span></div><h3>Medidas propostas</h3>{data.features.map(f=><div className="feature" key={f.id}><span>{f.name} <small>({f.status==="approved"?"aprovada":"proposta"})</small></span>{data.role==="instrutor"&&<button disabled={busy||f.status==="approved"} onClick={()=>approve(f.id)}>Aprovar</button>}</div>)}</section>
+    <section className="panel audioPanel" hidden={activeView!=="situacao"}>
+      <h2>Ambiente sonoro</h2>
+      <p className="muted">Efeitos sintéticos criados no próprio dispositivo. Sem áudio externo, sem gravações e sem custo por reprodução.</p>
+      <div className="audioControls">
+        <button type="button" aria-pressed={soundEnabled} onClick={enableSound}>
+          {soundEnabled?"Silenciar áudio":"Ativar áudio"}
+        </button>
+        <label>Volume: {soundVolume}%
+          <input type="range" min="0" max="45" step="1" value={soundVolume}
+            aria-label="Volume dos efeitos sonoros" disabled={!soundEnabled}
+            onChange={e=>{const n=Number(e.target.value);setSoundVolume(n);audioRef.current?.configure(soundEnabled,n/100)}}/>
+        </label>
+        <button type="button" onClick={previewSound} disabled={!soundEnabled}>Ouvir prévia de embate fictício</button>
+      </div>
+      <p className="muted" role="status" aria-live="polite">{audioInfo||"Som desativado por padrão. A prévia não cria acontecimentos na partida."}</p>
+    </section>
     <aside className="panel" hidden={activeView!=="situacao"}><h2>Indicadores logísticos fictícios</h2>{Object.entries(data.resources).map(([name,val])=><div className="indicator" key={name}><label>{name} <strong>{val}/100</strong></label><div className="bar"><div style={{width:`${val}%`}}/></div></div>)}{data.role==="instrutor"&&<button disabled={busy||data.turn>=20} onClick={turn}>Avançar turno</button>}<p className="muted">Eventos com causa registrada e regras reproduzíveis. Os índices não representam capacidades militares reais.</p></aside>
     <section className="panel" hidden={activeView!=="situacao"}><h2>Informações do Estado-Maior fictício</h2><div className="form"><label>Origem<input value={source} maxLength={120} onChange={e=>setSource(e.target.value)}/></label>{data.role==="instrutor"&&<label>Destinatário<select value={party} onChange={e=>setParty(e.target.value)}><option value="azul">Azul</option><option value="vermelha">Vermelho</option><option value="instrutor">Instrutor</option></select></label>}<label>Relatório<textarea value={message} maxLength={1000} onChange={e=>setMessage(e.target.value)} placeholder="Registre um acontecimento ou informação fictícia"/></label><button disabled={busy||!message.trim()||!source.trim()} onClick={report}>Registrar relatório</button></div><div className="timeline">{data.reports.slice().reverse().map(r=><article key={r.id}><b>{r.source}</b> · {r.party} · turno {r.turn}<p>{r.message}</p></article>)}</div></section>
     {data.role==="instrutor"&&<section className="panel" hidden={activeView!=="avaliacao"}><h2>Histórico e Análise Pós-Ação</h2><button onClick={loadApa}>Gerar APA descritiva</button>{apa&&<div className="apa"><p><strong>{apa.turns}</strong> turnos · <strong>{apa.report_count}</strong> relatórios · <strong>{apa.approved_features}</strong> medidas aprovadas</p><h3>Alterações de indicadores</h3>{Object.entries(apa.resource_variations).map(([k,v])=><p key={k}>{k}: −{v}</p>)}<p className="muted">{apa.methodology}</p>{apa.recommendations.map(x=><p key={x}>• {x}</p>)}</div>}<h3>Últimos eventos</h3><div className="timeline">{data.events.slice(-7).reverse().map((e,i)=><article key={i}><b>Turno {e.turn}</b> — {e.name??e.kind}{e.cause&&<p>{e.cause}</p>}</article>)}</div></section>}
