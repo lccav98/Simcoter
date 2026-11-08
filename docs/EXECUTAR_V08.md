@@ -46,10 +46,11 @@ Depois da primeira instalação, basta executar `python scripts/start_local.py`
 2. Criar uma partida fictícia e guardar os tokens exibidos somente nessa criação.
 3. Conferir o MapLibre: zoom +/−, deslocamento, escala, unidades fictícias.
 4. Aprovar uma medida: o calco aprovado aparece sobre o mapa.
-5. Registrar um relatório, avançar turnos e consultar MPS.
-6. Solicitar análise do Estado-Maior Virtual E1–E4 e aprovar/rejeitar uma proposta.
-7. Gerar a APA descritiva.
-8. Consultar o tutor: com IA desabilitada, a interface apresenta o fallback.
+5. Na aba Situação, usar **Ativar áudio**, ajustar o volume e ouvir a prévia sonora de embate fictício. A prévia não registra combate no cenário.
+6. Registrar um relatório, avançar turnos e consultar MPS.
+7. Solicitar análise do Estado-Maior Virtual E1–E4 e aprovar/rejeitar uma proposta.
+8. Gerar a APA descritiva.
+9. Consultar o tutor: com IA desabilitada, a interface apresenta o fallback.
 
 ## iPad — situação atual
 
