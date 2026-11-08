@@ -84,3 +84,22 @@ test("legenda: filtros por partido, natureza e medidas", async ({ page }) => {
   await page.getByRole("button", { name: "Ocultar legenda" }).click();
   await expect(legend).toHaveCount(0);
 });
+
+
+test("som opcional: desativado por padrão, volume e prévia sem alterar partida", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Criar partida individual" }).click();
+  const turn=page.getByText("Turno 0/20");
+  await expect(turn).toBeVisible();
+  const sound=page.getByRole("button", { name: "Ativar áudio" });
+  await expect(sound).toHaveAttribute("aria-pressed","false");
+  await expect(page.getByRole("button", { name: "Ouvir prévia de embate fictício" })).toBeDisabled();
+  await sound.click();
+  await expect(page.getByRole("button", { name: "Silenciar áudio" })).toHaveAttribute("aria-pressed","true");
+  await page.getByRole("slider", { name: "Volume dos efeitos sonoros" }).fill("20");
+  await expect(page.getByText("Volume: 20%")).toBeVisible();
+  await page.getByRole("button", { name: "Ouvir prévia de embate fictício" }).click();
+  await expect(page.getByText("Turno 0/20")).toBeVisible();
+  await page.getByRole("button", { name: "Silenciar áudio" }).click();
+  await expect(page.getByRole("button", { name: "Ativar áudio" })).toHaveAttribute("aria-pressed","false");
+});
