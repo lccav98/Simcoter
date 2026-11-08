@@ -306,6 +306,9 @@ class GameStore:
             "report_count": len(state["reports"]),
             "approved_features": sum(f["status"] == "approved" for f in state["features"]),
             "resource_variations": changes,
+            "weather": state.get("weather", "normal"),
+            "environmental_movements": [e for e in state["events"] if e["kind"] in {"fictitious_move", "weather_changed"}],
+            "unavailable_units": [e for e in state["events"] if e["kind"] == "unit_unavailable"],
             "unit_readiness": [{ "unit_id": u["id"], "name": u["name"],
                "readiness": u["readiness"], "status": u["readiness_status"] }
                for u in state["units"]],
