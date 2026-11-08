@@ -31,7 +31,7 @@ Um tablet isolado poderá ter consultas e atividades simplificadas offline, mas 
 | Gestor de Informações (SGSS) | Ingestão multi-origem, metadados, divergências, acessos | Dado recebido não vira fato automaticamente |
 | Evolução Contextual (MECC) | Propostas de eventos causais coerentes | Validador determinístico aprova/rejeita |
 | Biblioteca (BDI) | Catálogo, versões, trechos, citações, recuperação local | Apenas publicações autorizadas |
-| IA didática | Tutoria, síntese, propostas estruturadas e APA | Modelo não altera o estado diretamente |
+| IA didática | Tutor local opcional Ollama com saída JSON, citações aos IDs do estado e fallback; demais agentes ainda planejados | Modelo não altera o estado diretamente |
 | APA | Reconstrução de turnos, evidências, comparação entre partidos | Distingue resultado, processo e acaso |
 | Instrutor | Controle de sessão, aprovação de eventos, exportação e replay | Log de ações obrigatório |
 
