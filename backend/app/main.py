@@ -68,7 +68,10 @@ def health():
 
 @app.post("/api/sessions")
 def create_session(body: NewSession):
-    return call(store.create_with_credentials, body.title, body.seed)
+    created = call(store.create_with_credentials, body.title, body.seed)
+    created["session"] = visible_state(created["session"], "instrutor")
+    created["session"]["role"] = "instrutor"
+    return created
 
 
 @app.get("/api/sessions/{session_id}")
