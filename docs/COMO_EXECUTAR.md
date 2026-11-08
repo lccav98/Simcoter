@@ -64,7 +64,7 @@ npm run build
 
 ## 5. Recursos implementados nesta etapa
 
-- Criação e persistência de uma sessão individual;
+- Criação e persistência de uma sessão individual; tokens de acesso por partida emitidos uma única vez ao instrutor.
 - Mapa SVG sintético, símbolos ilustrativos e aprovação de duas medidas pré-definidas;
 - Registro de relatórios fictícios, com origem, partido e turno;
 - Progressão determinística dos indicadores logísticos abstratos;
@@ -79,7 +79,7 @@ npm run build
 ## 6. Limitações importantes
 
 - **Há integração opcional de código com Ollama** para explicação didática, desativada por padrão; não foi validada com modelo real. Veja [TUTOR_IA_LOCAL.md](TUTOR_IA_LOCAL.md).
-- **Não há multijogador**, autenticação, separação real de dados entre partidos ou segurança para uso em redes compartilhadas.
+- **Não há multijogador pronto para uso em rede**. A versão 0.5 implementa tokens experimentais por partida e separação básica de respostas por partido, mas ainda não há autenticação individual, rotação de credenciais ou segurança homologada. Veja [ACESSO_E_PARTIDOS.md](ACESSO_E_PARTIDOS.md).
 - **Não há PWA offline instalável** nem integração com map.army/MapLibre neste estágio; o mapa é um SVG original, ilustrativo e sem georreferenciamento.
 - Os parâmetros são puramente fictícios; não se trata de previsão militar ou reprodução do DAMEPLAN.
 - Não expor a porta 8000 a redes externas. A API atual é exclusiva para desenvolvimento local.
