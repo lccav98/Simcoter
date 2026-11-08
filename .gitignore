@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+
+# Node/React
+node_modules/
+.next/
+.vite/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Local databases / caches / model files
+*.db
+*.sqlite
+*.sqlite3
+*.gguf
+*.safetensors
+models/
+data/
+cache/
+logs/
+*.log
+
+# Offline map packs / copyrighted doctrine PDFs
+*.mbtiles
+*.pmtiles
+doctrine/sources/
+maps/tiles/
+maps/packs/
+
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
