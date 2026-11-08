@@ -1,0 +1,27 @@
+import {test,expect} from "@playwright/test";
+test("mockup percorre revisão, turnos e reflexão sem gravar partida",async({page})=>{
+ const posts:string[]=[];page.on("request",r=>{if(r.method()==="POST")posts.push(r.url())});
+ await page.goto("/");
+ await page.getByRole("button",{name:"Explorar demonstração completa"}).click();
+ await expect(page.getByRole("heading",{name:"Visão geral",exact:true})).toBeVisible();
+ await page.screenshot({path:"test-results/mockup-overview.png",fullPage:true});
+ const nav=page.getByRole("navigation",{name:"Etapas da demonstração"});
+ await nav.getByRole("button",{name:"Ordem inicial"}).click();
+ await page.getByLabel("Objetivo pedagógico da demonstração").fill("Reflexão de teste");
+ await nav.getByRole("button",{name:"Composição dos meios"}).click();
+ await page.getByRole("button",{name:"Adicionar equipe demonstrativa"}).click();
+ await expect(page.getByLabel("Nome 4",{exact:true})).toBeVisible();
+ await nav.getByRole("button",{name:"Revisão do instrutor"}).click();
+ await page.getByRole("button",{name:"Aprovar demonstração",exact:true}).click();
+ await page.getByRole("button",{name:"Abrir simulação"}).click();
+ for(let i=0;i<4;i++)await page.getByRole("button",{name:"Avançar turno demonstrativo"}).click();
+ await expect(page.getByRole("heading",{name:"Turno 4 de 4"})).toBeVisible();
+ await expect(page.getByRole("button",{name:"Avançar turno demonstrativo"})).toBeDisabled();
+ await nav.getByRole("button",{name:"Avaliação",exact:false}).click();
+ await page.getByLabel("Síntese do aprendizado").fill("Conferir as fontes.");
+ await page.getByRole("button",{name:"Registrar reflexão",exact:true}).click();
+ await expect(page.getByRole("status")).toContainText("Síntese registrada");
+ await page.getByRole("button",{name:"Voltar ao sistema"}).click();
+ await expect(page.getByRole("button",{name:"Criar partida individual"})).toBeVisible();
+ expect(posts).toEqual([]);
+});
