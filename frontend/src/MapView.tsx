@@ -50,6 +50,8 @@ const geometry = (units: Unit[], features: Measure[]) => {
 export default function MapView({units,features}:Props) {
   const root = useRef<HTMLDivElement|null>(null);
   const mapRef = useRef<maplibregl.Map|null>(null);
+  const dataRef=useRef({units,features});
+  dataRef.current={units,features};
   const [error,setError] = useState("");
   useEffect(()=>{
     if (!root.current || mapRef.current) return;
@@ -57,7 +59,6 @@ export default function MapView({units,features}:Props) {
       setError("Este navegador não disponibiliza WebGL para o MapLibre.");
       return;
     }
-    const d=geometry(units,features);
     const map = new maplibregl.Map({
       container:root.current,
       style:{
@@ -71,8 +72,10 @@ export default function MapView({units,features}:Props) {
       center:ANCHOR, zoom:10.2, attributionControl:true,
     });
     mapRef.current=map;
-    map.addControl(new maplibregl.NavigationControl({showCompass:true}),"top-right");
+    map.addControl(new maplibregl.NavigationControl({showZoom:true,showCompass:true}),"top-right");
+    map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
     map.on("load",()=>{
+      const d=geometry(dataRef.current.units,dataRef.current.features);
       map.addSource("sim-units",{type:"geojson",data:d.units});
       map.addLayer({id:"sim-units-circles",type:"circle",source:"sim-units",
         paint:{"circle-radius":10,"circle-color":["case",["==",["get","party"],"azul"],"#2162b5","#b24c4c"],
@@ -95,6 +98,7 @@ export default function MapView({units,features}:Props) {
           .setText(String(f.properties?.name??"Organização fictícia")).addTo(map);
       });
     });
+    map.on("error",()=>setError("Falha ao carregar parte do mapa. Verifique a conexão à internet."));
     return ()=>{map.remove();mapRef.current=null};
     // Criação única. Mudanças nas entidades serão aplicadas pelo efeito abaixo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
