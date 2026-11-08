@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { createUnitMarker, type SimUnit } from "./militarySymbols";
 
-type Unit = {id:string;party:"azul"|"vermelha";name:string;x:number;y:number};
+type Unit = SimUnit;
 type Measure = {id:string;name:string;kind:string;status:"proposed"|"approved"};
 type Props = {units:Unit[];features:Measure[]};
 
@@ -50,6 +51,7 @@ const geometry = (units: Unit[], features: Measure[]) => {
 export default function MapView({units,features}:Props) {
   const root = useRef<HTMLDivElement|null>(null);
   const mapRef = useRef<maplibregl.Map|null>(null);
+  const markerRef=useRef<maplibregl.Marker[]>([]);
   const dataRef=useRef({units,features});
   dataRef.current={units,features};
   const [error,setError] = useState("");
@@ -76,13 +78,16 @@ export default function MapView({units,features}:Props) {
     map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
     map.on("load",()=>{
       const d=geometry(dataRef.current.units,dataRef.current.features);
-      map.addSource("sim-units",{type:"geojson",data:d.units});
-      map.addLayer({id:"sim-units-circles",type:"circle",source:"sim-units",
-        paint:{"circle-radius":10,"circle-color":["case",["==",["get","party"],"azul"],"#2162b5","#b24c4c"],
-          "circle-stroke-color":"#fff","circle-stroke-width":2}});
-      map.addLayer({id:"sim-units-labels",type:"symbol",source:"sim-units",
-        layout:{"text-field":["get","name"],"text-size":12,"text-offset":[0,1.8]},
-        paint:{"text-halo-color":"#fff","text-halo-width":2}});
+      // Marcadores próprios e escaláveis sobre o mapa MapLibre.
+      // Não representam unidades reais ou posições conhecidas.
+      markerRef.current=dataRef.current.units.map(unit=>{
+        const coords:[number,number]=[ANCHOR[0]+(unit.x-50)*0.004,ANCHOR[1]-(unit.y-50)*0.004];
+        const marker=new maplibregl.Marker({element:createUnitMarker(unit),anchor:"center"})
+          .setLngLat(coords)
+          .setPopup(new maplibregl.Popup({offset:18}).setText(unit.name))
+          .addTo(map);
+        return marker;
+      });
       map.addSource("sim-area",{type:"geojson",data:d.area});
       map.addLayer({id:"sim-area-fill",type:"fill",source:"sim-area",
         paint:{"fill-color":"#2162b5","fill-opacity":0.12}});
@@ -91,15 +96,10 @@ export default function MapView({units,features}:Props) {
       map.addSource("sim-point",{type:"geojson",data:d.point});
       map.addLayer({id:"sim-point-symbol",type:"circle",source:"sim-point",
         paint:{"circle-color":"#eac170","circle-radius":11,"circle-stroke-color":"#664719","circle-stroke-width":2}});
-      map.on("click","sim-units-circles",(event)=>{
-        const f=event.features?.[0];
-        if(f?.geometry.type!=="Point") return;
-        new maplibregl.Popup().setLngLat(event.lngLat)
-          .setText(String(f.properties?.name??"Organização fictícia")).addTo(map);
-      });
+
     });
     map.on("error",()=>setError("Falha ao carregar parte do mapa. Verifique a conexão à internet."));
-    return ()=>{map.remove();mapRef.current=null};
+    return ()=>{markerRef.current.forEach(m=>m.remove());markerRef.current=[];map.remove();mapRef.current=null};
     // Criação única. Mudanças nas entidades serão aplicadas pelo efeito abaixo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
@@ -107,7 +107,14 @@ export default function MapView({units,features}:Props) {
     const map=mapRef.current;
     if(!map || !map.isStyleLoaded()) return;
     const d=geometry(units,features);
-    (map.getSource("sim-units") as maplibregl.GeoJSONSource|undefined)?.setData(d.units);
+    if(markerRef.current.length){
+      markerRef.current.forEach(m=>m.remove());
+      markerRef.current=units.map(unit=>{
+        const coords:[number,number]=[ANCHOR[0]+(unit.x-50)*0.004,ANCHOR[1]-(unit.y-50)*0.004];
+        return new maplibregl.Marker({element:createUnitMarker(unit),anchor:"center"})
+          .setLngLat(coords).setPopup(new maplibregl.Popup({offset:18}).setText(unit.name)).addTo(map);
+      });
+    }
     (map.getSource("sim-area") as maplibregl.GeoJSONSource|undefined)?.setData(d.area);
     (map.getSource("sim-point") as maplibregl.GeoJSONSource|undefined)?.setData(d.point);
   },[units,features]);
