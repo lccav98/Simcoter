@@ -12,6 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .game import GameStore
+from .context import analyze_context
+from .doctrine import search_catalog
 
 DB_PATH = os.getenv("SIMCOTER_DB", str(Path(__file__).resolve().parents[2] / "data" / "simcoter.sqlite3"))
 store = GameStore(DB_PATH)
@@ -78,3 +80,16 @@ def approve_feature(session_id: str, feature_id: str):
 @app.get("/api/sessions/{session_id}/apa")
 def get_apa(session_id: str):
     return call(store.apa, session_id)
+
+
+@app.get("/api/doctrine")
+def doctrine_catalog(q: str = ""):
+    if len(q) > 160:
+        raise HTTPException(status_code=400, detail="Consulta muito longa")
+    return {"items": search_catalog(q), "mode": "metadata_only", "verified_citations": False}
+
+
+@app.get("/api/sessions/{session_id}/context")
+def context_problems(session_id: str):
+    state = call(store.get, session_id)
+    return analyze_context(state)
