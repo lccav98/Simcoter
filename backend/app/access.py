@@ -31,7 +31,7 @@ def visible_state(state: dict, role: str) -> dict:
     if role not in ROLES:
         raise ValueError("Papel inválido")
     if role == "instrutor":
-        return state
+        return {**state, "role": "instrutor"}
     return {
         "id": state["id"], "title": state["title"], "turn": state["turn"],
         "scenario": "Exercício fictício com informações limitadas ao partido.",
