@@ -27,13 +27,15 @@ Um tablet isolado poderá ter consultas e atividades simplificadas offline, mas 
 | Cartografia | Mapas offline, calungas e calcos propostos/aprovados | Licença e formatos verificados |
 | Coordenação de medidas | Validação de conflitos documentais, espaciais e temporais | Não determina alvos nem engajamentos |
 | Logística | Indicadores fictícios de suprimento, transporte, manutenção, saúde etc. | Não usa fatores reais sensíveis de consumo |
-| Eventos e embates | Resolução abstrata por turnos, sementes reproduzíveis | Não prevê letalidade ou desempenho militar real |
+| Eventos e embates | Motor MPS de probabilidades pedagógicas por turnos, sementes reproduzíveis e Monte Carlo | Não prevê letalidade ou desempenho militar real |
 | Gestor de Informações (SGSS) | Ingestão multi-origem, metadados, divergências, acessos | Dado recebido não vira fato automaticamente |
 | Evolução Contextual (MECC) | Propostas de eventos causais coerentes | Validador determinístico aprova/rejeita |
 | Biblioteca (BDI) | Catálogo, versões, trechos, citações, recuperação local | Apenas publicações autorizadas |
 | IA didática | Tutoria, síntese, propostas estruturadas e APA | Modelo não altera o estado diretamente |
 | APA | Reconstrução de turnos, evidências, comparação entre partidos | Distingue resultado, processo e acaso |
 | Instrutor | Controle de sessão, aprovação de eventos, exportação e replay | Log de ações obrigatório |
+
+O motor MPS utiliza regras públicas do próprio software e probabilidades inteiramente fictícias; consultar [docs/MOTOR_PROBABILISTICO.md](docs/MOTOR_PROBABILISTICO.md).
 
 ## 4. Fonte de verdade e fluxo de eventos
 
