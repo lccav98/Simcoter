@@ -70,6 +70,7 @@ def test_ollama_with_fake_local_response(monkeypatch, scenario):
     class FakeOpener:
         def open(self, req, timeout):
             assert req.full_url == "http://127.0.0.1:11434/api/generate"
+            assert json.loads(req.data)["think"] is False
             assert timeout == 20
             return FakeResponse()
 

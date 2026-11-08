@@ -71,3 +71,22 @@ Execute na raiz: `.venv\Scripts\python.exe scripts/check_local_ai.py`.
 O diagnóstico consulta apenas /api/tags na origem local configurada, sem proxies, redirecionamentos, download de modelos ou conteúdo de partidas. Retorno 0: serviço respondeu e o nome exato do modelo configurado está instalado; 2: serviço respondeu, mas modelo não encontrado; 1: configuração ou serviço indisponível/inválido. Isso não valida a qualidade nem a geração de texto do modelo.
 
 Validação atual: retorno 1, serviço indisponível. A IA continua opcional e desativada por padrão.
+
+## Validação real — 2026-11-08
+O serviço local foi encontrado com qwen3.5:4b instalado. O modelo padrão anterior (qwen3:4b) não estava instalado; selecione explicitamente o modelo disponível.
+
+Teste real pela rota autenticada, em banco temporário: modo ollama_local, available=true, 2,22 segundos, estado inalterado. Acesso sem token retornou 401 e partido Azul retornou 403. Os 53 testes Python passaram após o ajuste.
+
+A chamada agora solicita think=false, conforme https://ollama.com/blog/thinking. A primeira tentativa sem essa opção caiu em fallback por JSON inválido; a tentativa ajustada passou. O resultado continua sujeito a revisão: uma resposta chamou um indicador de 85 de "acima de 85", ilustrando que o contrato JSON não garante exatidão semântica.
+
+Ativação no Windows:
+~~~powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_local.ps1 -AIModel qwen3.5:4b
+~~~
+O parâmetro ativa a IA apenas no processo iniciado. Sem o parâmetro, permanece a configuração por variáveis de ambiente. Não instala nem baixa modelos.
+
+Repetir teste real isolado:
+~~~powershell
+.venv\Scripts\python.exe scripts/test_local_ai.py --model qwen3.5:4b
+~~~
+O teste cria somente banco temporário e não imprime credenciais. Não mede qualidade geral do modelo nem autoriza aplicação operacional.

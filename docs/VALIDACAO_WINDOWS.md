@@ -25,3 +25,5 @@ Pendências: solucionar lançamento dos navegadores e validar interface; WebKit/
 Atualização: base sintética offline validada; 18 testes Playwright e 51 Python passaram. Consulte CARTOGRAFIA_OFFLINE.md. Banco de E2E agora isolado em diretório temporário e porta 18000.
 
 Pacotes locais: build aprovado, 22 testes Playwright e 53 testes Python passaram. Diagnóstico Ollama executado: indisponível, geração real não validada. Importação limitada a linhas fictícias com metadados declarados de licença, sem upload ou persistência.
+
+IA real qwen3.5:4b validada em banco temporário pela rota autenticada: 2,22 s, estado inalterado, acesso 401/403 verificado. 53 testes Python passaram. Servidor local reiniciado com IA ativa e modelo explícito.

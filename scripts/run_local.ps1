@@ -1,5 +1,10 @@
+param([string]$AIModel = "")
 # Prepara ambiente isolado, compila React e inicia SIMCOTER 0.8 local.
 $ErrorActionPreference = "Stop"
+if ($AIModel) {
+    $env:SIMCOTER_AI_ENABLED = "true"
+    $env:SIMCOTER_OLLAMA_MODEL = $AIModel
+}
 Set-Location (Split-Path -Parent $PSScriptRoot)
 if (!(Test-Path ".venv\Scripts\python.exe")) {
     python -m venv .venv

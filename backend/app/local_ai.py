@@ -145,7 +145,7 @@ def explain(state: dict) -> dict:
             "model": model, "system": AI_SYSTEM,
             "prompt": "Explique apenas este exercício educativo e responda no esquema JSON fornecido:\n"
                       + json.dumps(snapshot, ensure_ascii=False),
-            "stream": False, "format": OUTPUT_SCHEMA,
+            "stream": False, "think": False, "format": OUTPUT_SCHEMA,
             "options": {"temperature": 0, "num_predict": 450},
         }
         req = request.Request(
