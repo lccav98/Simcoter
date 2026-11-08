@@ -140,3 +140,14 @@ footer{padding:28px 12px 14px;text-align:center;font-size:11px;color:#9cbbbd;let
 .workspace-nav button.selected{background:#d5a95b;color:#13262a;
   border-color:#f2d99d;box-shadow:0 5px 14px rgba(213,169,91,.13)}
 .panel[hidden]{display:none!important}
+
+/* Ícones vetoriais de unidades fictícias baseados em convenções de apresentação. */
+.military-unit-marker{width:69px;height:58px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;filter:drop-shadow(0 3px 3px rgba(0,0,0,.3));
+  touch-action:manipulation;transition:transform .15s ease}
+.military-unit-marker svg{height:100%;width:100%;overflow:visible}
+.military-unit-marker:hover,.military-unit-marker:focus-visible{transform:scale(1.12)}
+.mapShell .maplibregl-popup-content{background:#142b33;color:#edf4f5;
+  border:1px solid #45626b;border-radius:9px;font-weight:650;font-size:12px}
+.mapShell .maplibregl-popup-tip{border-top-color:#142b33}
+@media(max-width:900px){.military-unit-marker{width:75px;height:62px}}
