@@ -96,8 +96,11 @@ test("som opcional: desativado por padrão, volume e prévia sem alterar partida
   await expect(page.getByRole("button", { name: "Ouvir prévia de embate fictício" })).toBeDisabled();
   await sound.click();
   await expect(page.getByRole("button", { name: "Silenciar áudio" })).toHaveAttribute("aria-pressed","true");
-  await page.getByRole("slider", { name: "Volume dos efeitos sonoros" }).fill("20");
-  await expect(page.getByText("Volume: 20%")).toBeVisible();
+  const volume=page.getByRole("slider", { name: "Volume dos efeitos sonoros" });
+  await volume.focus();
+  await volume.press("Home");
+  await volume.press("ArrowRight");
+  await expect(page.getByText("Volume: 1%")).toBeVisible();
   await page.getByRole("button", { name: "Ouvir prévia de embate fictício" }).click();
   await expect(page.getByText("Turno 0/20")).toBeVisible();
   await page.getByRole("button", { name: "Silenciar áudio" }).click();
