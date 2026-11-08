@@ -1,30 +1,30 @@
-"""API local para demonstração individual do SIMCOTER.
+"""API experimental com tokens por partida e autorização por partido.
 
-IMPORTANTE: sem autenticação. Não expor a rede pública ou usar dados sensíveis.
+Uso exclusivo em localhost. Tokens não substituem identidades e sessões reais.
 """
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .game import GameStore
+from .access import visible_state
 from .context import analyze_context
 from .doctrine import search_catalog
 from .local_ai import explain
 
 DB_PATH = os.getenv("SIMCOTER_DB", str(Path(__file__).resolve().parents[2] / "data" / "simcoter.sqlite3"))
 store = GameStore(DB_PATH)
-app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.1.0")
+app = FastAPI(title="SIMCOTER - Protótipo educacional", version="0.5.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_credentials=False,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_credentials=False, allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
@@ -36,50 +36,71 @@ class NewSession(BaseModel):
 class NewReport(BaseModel):
     source: str = Field(min_length=1, max_length=120)
     message: str = Field(min_length=1, max_length=1000)
-    party: str = "azul"
+    # Somente instrutor pode escolher o partido de destino.
+    party: str | None = None
 
 
 def call(fn, *args):
     try:
         return fn(*args)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+        raise HTTPException(status_code=404, detail="Recurso não encontrado") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
+def guard(session_id: str, authorization: str | None, instructor: bool = False) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Credencial obrigatória")
+    token = authorization[7:].strip()
+    role = store.authenticate(session_id, token)
+    if role is None:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    if instructor and role != "instrutor":
+        raise HTTPException(status_code=403, detail="Ação reservada ao instrutor")
+    return role
+
+
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "mode": "individual", "ai_required": False}
+    return {"status": "ok", "mode": "individual_protected", "ai_required": False}
 
 
 @app.post("/api/sessions")
 def create_session(body: NewSession):
-    return call(store.create, body.title, body.seed)
+    return call(store.create_with_credentials, body.title, body.seed)
 
 
 @app.get("/api/sessions/{session_id}")
-def read_session(session_id: str):
-    return call(store.get, session_id)
+def read_session(session_id: str, authorization: str | None = Header(default=None)):
+    role = guard(session_id, authorization)
+    return visible_state(call(store.get, session_id), role)
 
 
 @app.post("/api/sessions/{session_id}/reports")
-def add_report(session_id: str, body: NewReport):
-    return call(store.report, session_id, body.source, body.message, body.party)
+def add_report(session_id: str, body: NewReport, authorization: str | None = Header(default=None)):
+    role = guard(session_id, authorization)
+    if role != "instrutor" and body.party not in (None, role):
+        raise HTTPException(status_code=403, detail="Não é permitido alterar o destinatário")
+    destination = (body.party or role)
+    return visible_state(call(store.report, session_id, body.source, body.message, destination), role)
 
 
 @app.post("/api/sessions/{session_id}/turns")
-def next_turn(session_id: str):
+def next_turn(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
     return call(store.next_turn, session_id)
 
 
 @app.post("/api/sessions/{session_id}/features/{feature_id}/approve")
-def approve_feature(session_id: str, feature_id: str):
+def approve_feature(session_id: str, feature_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
     return call(store.approve_feature, session_id, feature_id)
 
 
 @app.get("/api/sessions/{session_id}/apa")
-def get_apa(session_id: str):
+def get_apa(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
     return call(store.apa, session_id)
 
 
@@ -91,23 +112,20 @@ def doctrine_catalog(q: str = ""):
 
 
 @app.get("/api/sessions/{session_id}/context")
-def context_problems(session_id: str):
-    state = call(store.get, session_id)
-    return analyze_context(state)
+def context_problems(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return analyze_context(call(store.get, session_id))
 
 
 @app.get("/api/sessions/{session_id}/probability")
-def probability_preview(session_id: str, repetitions: int = 500):
-    """Prévia estatística abstrata e não mutável do próximo turno."""
+def probability_preview(
+    session_id: str, repetitions: int = 500, authorization: str | None = Header(default=None)
+):
+    guard(session_id, authorization, instructor=True)
     return call(store.probability_preview, session_id, repetitions)
 
 
 @app.get("/api/sessions/{session_id}/ai/explanation")
-def ai_explanation(session_id: str):
-    """Assessoria exclusivamente local, opcional e de leitura.
-
-    ATENÇÃO: protótipo sem autenticação/isolamento por partido;
-    não habilitar fora de localhost ou com dados sensíveis.
-    """
-    state = call(store.get, session_id)
-    return explain(state)
+def ai_explanation(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return explain(call(store.get, session_id))
