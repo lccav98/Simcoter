@@ -72,6 +72,8 @@ npm run build
 - Geração de APA **descritiva**, vinculada aos eventos salvos.
 - Catálogo local inicial de referências, somente metadados, com busca por termos.
 - Propostas de problemas pedagógicos condicionadas a gatilhos objetivos da partida.
+- Motor Probabilístico de Simulação (MPS) com eventos condicionados e efeitos abstratos, e painel de repetições Monte Carlo do próximo turno.
+- Consulta `GET /api/sessions/{id}/probability?repetitions=500` não altera os dados da partida.
 
 ## 6. Limitações importantes
 
