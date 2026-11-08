@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from .game import GameStore
 from .context import analyze_context
 from .doctrine import search_catalog
+from .local_ai import explain
 
 DB_PATH = os.getenv("SIMCOTER_DB", str(Path(__file__).resolve().parents[2] / "data" / "simcoter.sqlite3"))
 store = GameStore(DB_PATH)
@@ -99,3 +100,14 @@ def context_problems(session_id: str):
 def probability_preview(session_id: str, repetitions: int = 500):
     """Prévia estatística abstrata e não mutável do próximo turno."""
     return call(store.probability_preview, session_id, repetitions)
+
+
+@app.get("/api/sessions/{session_id}/ai/explanation")
+def ai_explanation(session_id: str):
+    """Assessoria exclusivamente local, opcional e de leitura.
+
+    ATENÇÃO: protótipo sem autenticação/isolamento por partido;
+    não habilitar fora de localhost ou com dados sensíveis.
+    """
+    state = call(store.get, session_id)
+    return explain(state)
