@@ -13,6 +13,7 @@ from .probability import sample_transition, forecast
 from .access import issue_credentials, fingerprint, verify_fingerprint
 from .virtual_staff import create_proposal, coordinate, AGENTS
 from .readiness import unit_state, apply_training_variation, READINESS_VERSION, can_participate, advance_turn
+from .environment import WEATHER, environment_view, movement_check, ENV_VERSION
 
 INITIAL_RESOURCES = {"suprimentos": 90, "manutencao": 85, "transporte": 88, "saude": 92}
 TEACHING_EVENTS = [
@@ -69,6 +70,7 @@ class GameStore:
             raise KeyError("Partida não encontrada")
         state = json.loads(row[0])
         state["units"] = unit_state(state["units"])
+        state.setdefault("weather", "normal")
         return state
 
     def create(self, title: str = "Exercício Horizonte", seed: int = 2026) -> dict:
@@ -78,7 +80,7 @@ class GameStore:
             "id": str(uuid.uuid4()), "title": title.strip() or "Exercício Horizonte",
             "seed": seed, "turn": 0, "resources": INITIAL_RESOURCES.copy(),
             "units": unit_state(UNITS), "features": [item.copy() for item in FEATURES],
-            "reports": [], "events": [], "staff_tasks": [], "created_at": utc_now(),
+            "reports": [], "events": [], "staff_tasks": [], "weather": "normal", "created_at": utc_now(),
             "scenario": "Território, organizações e parâmetros inteiramente fictícios.",
         }
         with self._lock, self._connect() as db:
@@ -196,6 +198,60 @@ class GameStore:
                 "rule": READINESS_VERSION,
                 "reason": "Disponível para exercício fictício" if available
                   else "Indisponível para novas ações simuladas"}
+
+    def environment(self, session_id: str) -> dict:
+        state = self.get(session_id)
+        return environment_view(state["weather"])
+
+    def change_weather(self, session_id: str, weather: str) -> dict:
+        if weather not in WEATHER:
+            raise ValueError("Condição climática inválida")
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            before = state["weather"]
+            state["weather"] = weather
+            state["events"].append({
+                "kind": "weather_changed", "turn": state["turn"],
+                "before": before, "after": weather, "rule": ENV_VERSION,
+                "cause": "Alteração climática fictícia pelo instrutor",
+            })
+            self._save(db, state)
+        return state
+
+    def unit_movement_check(
+        self, session_id: str, unit_id: str, x: int, y: int,
+        authorized: bool = False,
+    ) -> dict:
+        state = self.get(session_id)
+        unit = next((u for u in state["units"] if u["id"] == unit_id), None)
+        if unit is None:
+            raise KeyError("Unidade inexistente")
+        return movement_check(unit, x, y, state["weather"], authorized)
+
+    def move_unit(
+        self, session_id: str, unit_id: str, x: int, y: int,
+        authorized: bool = False,
+    ) -> dict:
+        """Deslocamento entre coordenadas fictícias, sem cálculo de rota."""
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            unit = next((u for u in state["units"] if u["id"] == unit_id), None)
+            if unit is None:
+                raise KeyError("Unidade inexistente")
+            check = movement_check(unit, x, y, state["weather"], authorized)
+            if not check["allowed"]:
+                raise ValueError("; ".join(check["reasons"]))
+            previous = {"x": unit["x"], "y": unit["y"]}
+            unit["x"], unit["y"] = x, y
+            state["events"].append({
+                "kind": "fictitious_move", "turn": state["turn"],
+                "unit_id": unit_id, "before": previous,
+                "after": {"x": x, "y": y},
+                "terrain": check["terrain"], "weather": check["weather"],
+                "human_review": authorized, "rule": ENV_VERSION,
+            })
+            self._save(db, state)
+        return state
 
     def staff_assign(self, session_id: str, agent: str) -> dict:
         """Nova tarefa documental para um integrante virtual; sem alterar o cenário."""
