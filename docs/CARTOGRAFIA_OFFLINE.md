@@ -13,3 +13,33 @@ Validação de 2026-11-08: build TypeScript/Vite aprovado; 18 testes Playwright 
 Playwright usa 127.0.0.1:18000 e banco temporário próprio, separado das partidas do usuário. Bancos temporários ficam na pasta temporária do Windows. Dados existentes não foram removidos.
 
 Ollama: serviço local indisponível em 127.0.0.1:11434 nesta validação. Não foi instalado nem baixado modelo. Integração agora desabilita proxies do sistema explicitamente e mantém bloqueio de redirecionamentos. Validação com modelo real permanece pendente.
+
+## Pacotes vetoriais locais
+O instrutor pode importar um arquivo JSON de até 1 MB pela opção "Importar pacote cartográfico fictício". Esta versão aceita apenas LineString, até 500 feições e 10.000 pontos, com longitude entre -180 e 180 e latitude entre -85 e 85. Propriedades arbitrárias são descartadas. Não são aceitos tiles, estilos executáveis ou referências remotas.
+
+O pacote fica somente na memória da visualização e pode ser removido pelo botão. Recarregar, sair ou trocar de partida descarta o pacote. Ele não é enviado ao servidor, salvo no banco ou compartilhado com outros partidos.
+
+Formato mínimo:
+~~~json
+{
+  "version": 1,
+  "fictional": true,
+  "offlineAllowed": true,
+  "title": "Traçado fictício",
+  "source": "Desenho original do autor",
+  "license": "Autorização de uso privado pelo autor",
+  "attribution": "Autor do desenho",
+  "data": {
+    "type": "FeatureCollection",
+    "features": [{
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-48.0, -15.8], [-47.9, -15.7]]
+      }
+    }]
+  }
+}
+~~~
+Os campos são declarações do responsável pelo arquivo, não certificação automática de direitos. Verifique a autorização antes de importar. O exemplo é apenas um segmento fictício, não um dado cartográfico real. A importação de cartas reais licenciadas continua fora desta versão.

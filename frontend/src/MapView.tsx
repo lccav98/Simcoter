@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import { offlineStyle } from "./offlineMap";
+import { parseLocalPack, MAX_PACK_BYTES, type LocalPack } from "./localMapPack";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   createUnitMarker, symbolMarkup, safeKind, safeEchelon, readinessInfo,
@@ -11,7 +12,7 @@ import {
 type Measure = {id:string;name:string;kind:string;status:"proposed"|"approved"};
 type TerrainZone = {id:string;label:string;grade:"restritivo"|"impeditivo";bounds:{x_min:number;x_max:number;y_min:number;y_max:number}};
 export type EnvironmentData = {weather:"normal"|"adverse"|"severe";weather_label:string;zones:TerrainZone[];version:string};
-type Props = {units:SimUnit[];features:Measure[];environment?:EnvironmentData|null};
+type Props = {allowImport?:boolean;units:SimUnit[];features:Measure[];environment?:EnvironmentData|null};
 type Filters = {parties:Record<Party,boolean>;kinds:Record<UnitKind,boolean>;overlays:boolean;terrain:boolean};
 const ANCHOR:[number,number]=[-47.9292,-15.7801];
 const INITIAL_FILTERS:Filters = {
@@ -49,7 +50,7 @@ function overlays(features:Measure[],show:boolean) {
   };
 }
 
-export default function MapView({units,features,environment}:Props) {
+export default function MapView({units,features,environment,allowImport=false}:Props) {
   const container=useRef<HTMLDivElement|null>(null);
   const mapRef=useRef<maplibregl.Map|null>(null);
   const markers=useRef<maplibregl.Marker[]>([]);
@@ -57,6 +58,27 @@ export default function MapView({units,features,environment}:Props) {
   const [filters,setFilters]=useState<Filters>(INITIAL_FILTERS);
   const [legendOpen,setLegendOpen]=useState(false);
   const [error,setError]=useState("");
+  const [pack,setPack]=useState<LocalPack|null>(null);
+  const [mapReady,setMapReady]=useState(false);
+  async function importPack(file?:File) {
+    if(!file)return;
+    try {
+      if(file.size>MAX_PACK_BYTES)throw new Error("Arquivo excede 1 MB.");
+      const next=parseLocalPack(await file.text());
+      setPack(next);setError("");
+    } catch(e) {setError(e instanceof Error?e.message:"Pacote inválido.");}
+  }
+  useEffect(()=>{
+    const map=mapRef.current;
+    if(!mapReady||!map)return;
+    if(map.getLayer("local-pack-lines"))map.removeLayer("local-pack-lines");
+    if(map.getSource("local-pack"))map.removeSource("local-pack");
+    if(pack&&allowImport) {
+      map.addSource("local-pack",{type:"geojson",data:pack.data});
+      map.addLayer({id:"local-pack-lines",type:"line",source:"local-pack",
+        paint:{"line-color":"#526c76","line-width":2}},"sim-area-fill");
+    }
+  },[pack,mapReady,allowImport]);
   latest.current={units,features,environment,filters};
 
   const syncMarkers=(map:maplibregl.Map,items:SimUnit[],f:Filters)=>{
@@ -110,8 +132,9 @@ export default function MapView({units,features,environment}:Props) {
         paint:{"line-color":["match",["get","grade"],"impeditivo","#9a2626","restritivo","#a37b34","#7e8e8e"],
           "line-width":2,"line-dasharray":[3,2]}});
       syncMarkers(map,current.units,current.filters);
+      setMapReady(true);
     });
-    map.on("error",()=>setError("Falha ao carregar parte do mapa. Confira a conexão à internet."));
+    map.on("error",()=>setError("Falha ao renderizar o mapa local. Recarregue a página ou remova o pacote."));
     return ()=>{
       markers.current.forEach(m=>m.remove());
       markers.current=[];
@@ -147,6 +170,13 @@ export default function MapView({units,features,environment}:Props) {
         {legendOpen?"Ocultar legenda":"Legenda e camadas"}
       </button>
     </div>
+    {allowImport&&<div className="panel">
+      <label>Importar pacote cartográfico fictício <input type="file" accept=".json,application/json"
+        onChange={e=>{void importPack(e.target.files?.[0]);e.target.value="";}}/></label>
+      <p>Arquivo local com origem, licença e autorização offline. Uso somente nesta visualização.</p>
+      {pack&&<div role="status"><strong>{pack.title}</strong><p>Origem: {pack.source} · Licença: {pack.license}</p>
+        <p>Atribuição: {pack.attribution}</p><button onClick={()=>setPack(null)}>Remover pacote local</button></div>}
+    </div>}
     <div className="mapReal" ref={container} role="application"
       aria-label="Mapa geográfico interativo MapLibre GL JS"/>
     {legendOpen&&<section className="mapLegend" id="simcoter-map-legend"

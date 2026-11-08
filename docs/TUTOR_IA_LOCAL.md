@@ -65,3 +65,9 @@ Os testes com cliente HTTP falso verificam fallback, validação dos IDs, restri
 Referências técnicas: [Ollama API](https://docs.ollama.com/api), [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs), [FastAPI](https://fastapi.tiangolo.com/).
 
 A conexão agora ignora proxies do sistema explicitamente. Serviço Ollama ausente na validação de 2026-11-08; testes automatizados não substituem execução com modelo real.
+
+## Diagnóstico sem geração
+Execute na raiz: `.venv\Scripts\python.exe scripts/check_local_ai.py`.
+O diagnóstico consulta apenas /api/tags na origem local configurada, sem proxies, redirecionamentos, download de modelos ou conteúdo de partidas. Retorno 0: serviço respondeu e o nome exato do modelo configurado está instalado; 2: serviço respondeu, mas modelo não encontrado; 1: configuração ou serviço indisponível/inválido. Isso não valida a qualidade nem a geração de texto do modelo.
+
+Validação atual: retorno 1, serviço indisponível. A IA continua opcional e desativada por padrão.
