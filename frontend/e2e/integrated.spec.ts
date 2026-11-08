@@ -57,3 +57,30 @@ test("acesso separado por partido não revela dados globais", async ({ page }) =
   await expect(page.getByRole("button", { name: "Estado-Maior", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Avançar turno" })).toHaveCount(0);
 });
+
+
+test("legenda: filtros por partido, natureza e medidas", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Criar partida individual" }).click();
+  await page.getByRole("button", { name: "Legenda e camadas" }).click();
+  const legend=page.getByRole("region", { name: "Legenda e filtros cartográficos" });
+  await expect(legend).toBeVisible();
+  await expect(legend.getByText("3 de 3 unidades exibidas")).toBeVisible();
+  await expect(legend.locator(".symbolLegendItem")).toHaveCount(3);
+  await legend.getByRole("checkbox", { name: "Vermelho" }).uncheck();
+  await expect(legend.getByText("2 de 3 unidades exibidas")).toBeVisible();
+  await legend.getByRole("checkbox", { name: "Logística" }).uncheck();
+  await expect(legend.getByText("1 de 3 unidades exibidas")).toBeVisible();
+  await legend.getByRole("checkbox", { name: "Medidas gráficas aprovadas" }).uncheck();
+  await expect(legend.getByRole("checkbox", { name: "Medidas gráficas aprovadas" })).not.toBeChecked();
+  const markers=page.locator(".military-unit-marker");
+  // Sem WebGL, a legenda ainda mantém sua utilidade; os marcadores exigem a renderização.
+  if(await page.locator(".maplibregl-canvas").count() > 0) {
+    await expect(markers).toHaveCount(1);
+  }
+  await legend.getByRole("checkbox", { name: "Vermelho" }).check();
+  await legend.getByRole("checkbox", { name: "Logística" }).check();
+  await expect(legend.getByText("3 de 3 unidades exibidas")).toBeVisible();
+  await page.getByRole("button", { name: "Ocultar legenda" }).click();
+  await expect(legend).toHaveCount(0);
+});
