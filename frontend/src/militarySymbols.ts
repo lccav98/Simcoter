@@ -1,10 +1,8 @@
-/** Simbologia VETORIAL didática inspirada na estrutura pública MD33-M-02/MD33-C-01.
- * NÃO é reprodução oficial, certificada ou completa do catálogo.
- * Os símbolos são criados do zero, em SVG, para organizações fictícias.
- * Sem acesso externo, imagens copiadas, licença de assets ou fonte remota.
+/** Catálogo vetorial DIDÁTICO e original, não homologado pela simbologia EB.
+ * Referências de estudo: MD33-M-02 e MD33-C-01. Não exporta códigos SIDC.
  */
 export type Party = "azul" | "vermelha";
-export type UnitKind = "infantry" | "logistics" | "command";
+export type UnitKind = "infantry" | "logistics" | "command" | "engineering" | "communications" | "medical" | "transport";
 export type Echelon = "platoon" | "company" | "battalion" | "brigade";
 export type SimUnit = {
   id:string;
@@ -15,33 +13,56 @@ export type SimUnit = {
   kind?:UnitKind;
   echelon?:Echelon;
 };
-
 export const MILITARY_SYMBOL_REFERENCE = {
-  title: "Simbologia militar terrestre — protótipo didático",
-  catalog: "MD33-C-01 (1ª edição, 2021)",
-  status: "composição ilustrativa, sem declaração de conformidade oficial",
+  title:"Biblioteca vetorial didática de organizações fictícias",
+  catalog:"MD33-C-01 (2021), referência para verificação posterior",
+  status:"não certificado como simbologia militar oficial",
 } as const;
 
-const ECHELON_MARK: Record<Echelon,string> = {
-  platoon:"•••",
-  company:"I",
-  battalion:"II",
-  brigade:"X",
+export const KIND_LABELS:Record<UnitKind,string> = {
+  infantry:"Infantaria",
+  logistics:"Logística",
+  command:"Comando",
+  engineering:"Engenharia",
+  communications:"Comunicações",
+  medical:"Saúde",
+  transport:"Transporte",
 };
-
+export const ECHELON_LABELS:Record<Echelon,string> = {
+  platoon:"Pelotão",
+  company:"Companhia",
+  battalion:"Batalhão",
+  brigade:"Brigada",
+};
+export const PARTY_LABELS:Record<Party,string> = {
+  azul:"Azul",
+  vermelha:"Vermelho",
+};
+const ECHELON_MARK:Record<Echelon,string> = {
+  platoon:"•••", company:"I", battalion:"II", brigade:"X",
+};
+const KIND_ICON:Record<UnitKind,string> = {
+  infantry:'<path d="M30 25 L68 52 M68 25 L30 52" stroke-width="4.2" stroke-linecap="round"/>',
+  logistics:'<path d="M34 41 L43 50 L61 30" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  command:'<path d="M31 30 H67 M49 23 V53" stroke-width="4" stroke-linecap="round"/>',
+  engineering:'<path d="M30 48 L42 27 L54 48 M55 25 V52 M64 25 V52" stroke-width="3.7" stroke-linecap="round"/>',
+  communications:'<circle cx="49" cy="40" r="5" stroke-width="3"/><path d="M39 31 Q49 18 59 31 M34 27 Q49 8 64 27 M39 49 Q49 62 59 49" stroke-width="2.8" stroke-linecap="round"/>',
+  medical:'<path d="M45 26 H53 V36 H63 V44 H53 V54 H45 V44 H35 V36 H45 Z" stroke-width="2.8"/>',
+  transport:'<rect x="32" y="31" width="34" height="17" rx="2" stroke-width="3"/><circle cx="41" cy="52" r="4" stroke-width="2.8"/><circle cx="58" cy="52" r="4" stroke-width="2.8"/>',
+};
+export function safeKind(value?:string):UnitKind {
+  return value && Object.prototype.hasOwnProperty.call(KIND_LABELS,value) ? value as UnitKind : "infantry";
+}
+export function safeEchelon(value?:string):Echelon {
+  return value && Object.prototype.hasOwnProperty.call(ECHELON_LABELS,value) ? value as Echelon : "company";
+}
 export function symbolMarkup(party:Party, kind:UnitKind, echelon:Echelon):string {
-  const hostile = party === "vermelha";
-  const stroke = hostile ? "#9f343b" : "#235697";
-  const fill = hostile ? "#f7dcdb" : "#dceaff";
-  // Componentes geométricos didáticos. O "X" para infantaria é familiar,
-  // mas o conjunto não reivindica equivalência ao símbolo oficial.
-  const center = kind==="infantry"
-    ? '<path d="M30 25 L68 52 M68 25 L30 52" stroke-width="4.3" stroke-linecap="round"/>'
-    : kind==="logistics"
-      ? '<path d="M34 40 L43 49 L61 29" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
-      : '<path d="M31 28 H67 M49 23 V54" stroke-width="4" stroke-linecap="round"/>';
-  const mark = ECHELON_MARK[echelon];
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 82" role="img" aria-hidden="true">
+  const red=party==="vermelha";
+  const stroke=red?"#9f343b":"#235697";
+  const fill=red?"#f7dcdb":"#dceaff";
+  const mark=ECHELON_MARK[safeEchelon(echelon)];
+  const center=KIND_ICON[safeKind(kind)];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 82" aria-hidden="true">
     <text x="49" y="13" font-size="13" font-weight="800" font-family="Arial,sans-serif"
       text-anchor="middle" fill="${stroke}">${mark}</text>
     <rect x="13" y="18" width="72" height="44" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="3"/>
@@ -49,15 +70,16 @@ export function symbolMarkup(party:Party, kind:UnitKind, echelon:Echelon):string
     <path d="M13 62 V69" stroke="${stroke}" stroke-width="2" opacity=".6"/>
   </svg>`;
 }
-
+export function unitDescription(unit:SimUnit):string {
+  return `${unit.name} — ${KIND_LABELS[safeKind(unit.kind)]}, ${ECHELON_LABELS[safeEchelon(unit.echelon)]}, partido ${PARTY_LABELS[unit.party]}`;
+}
 export function createUnitMarker(unit:SimUnit):HTMLElement {
   const wrapper=document.createElement("div");
   wrapper.className="military-unit-marker";
   wrapper.setAttribute("role","img");
-  wrapper.setAttribute("aria-label", `Símbolo didático de ${unit.name}`);
-  wrapper.title=unit.name;
-  const echelon=unit.echelon ?? "company";
-  const kind=unit.kind ?? "infantry";
-  wrapper.innerHTML=symbolMarkup(unit.party,kind,echelon);
+  wrapper.setAttribute("aria-label",unitDescription(unit));
+  wrapper.title=unitDescription(unit);
+  // Campos não confiáveis não são interpolados como HTML. Apenas enums validados.
+  wrapper.innerHTML=symbolMarkup(unit.party,safeKind(unit.kind),safeEchelon(unit.echelon));
   return wrapper;
 }
