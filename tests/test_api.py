@@ -1,3 +1,4 @@
+from tests.cycle_helpers import approve_and_review
 """Testes HTTP do modelo experimental de tokens por partida."""
 from fastapi.testclient import TestClient
 
@@ -32,7 +33,7 @@ def test_api_flow(tmp_path, monkeypatch):
         headers=headers["instrutor"],
     ).status_code == 200
     assert client.post(
-        f"/api/sessions/{session_id}/turns", headers=headers["instrutor"]
+        f"/api/sessions/{session_id}/turns", json={"token":approve_and_review(client,session_id,headers["instrutor"])}, headers=headers["instrutor"]
     ).json()["turn"] == 1
     assert client.get(
         f"/api/sessions/{session_id}/apa", headers=headers["instrutor"]
@@ -116,7 +117,7 @@ def test_mutations_preserve_authenticated_instructor_role(tmp_path, monkeypatch)
     state = client.get(f"/api/sessions/{sid}", headers=headers["instrutor"]).json()
     unit_id = state["units"][0]["id"]
     actions = [
-        ("turns", {}),
+        ("turns", {"token":approve_and_review(client,sid,headers["instrutor"])}),
         ("features/ponto-1/approve", {}),
         (f"units/{unit_id}/readiness", {"change": -1}),
         ("environment/weather", {"weather": "normal"}),

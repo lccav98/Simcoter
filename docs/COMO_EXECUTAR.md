@@ -1,5 +1,7 @@
 # Como executar o SIMCOTER
 
+> Guia atualizado em 09/11/2026: [GUIA_OPERACAO.md](GUIA_OPERACAO.md). Consulte-o para o ciclo integrado e o passo a passo atual. O texto abaixo é histórico e contém limitações de versões anteriores, especialmente sobre MapLibre e validação do Ollama.
+
 > Este é um **MVP didático individual**, não uma versão completa do SIMCOTER. Para iniciar frontend e API em uma só origem, prefira o guia [INSTALACAO_COMPUTADOR.md](INSTALACAO_COMPUTADOR.md), com o arquivo INICIAR_SIMCOTER.cmd no Windows. Complementos técnicos: [EXECUTAR_V08.md](EXECUTAR_V08.md) e [TERRENO_CLIMA_PRONTIDAO.md](TERRENO_CLIMA_PRONTIDAO.md).
 > Requer Python 3.10+, Node.js 20+ e npm. A instalação inicial das dependências exige acesso aos respectivos repositórios; depois, o protótipo básico pode operar sem internet, desde que tudo esteja previamente instalado.
 

@@ -26,6 +26,15 @@ export default function Preparation({sessionId,initial,units,turn,onSave}:{sessi
  <p>Revisão {form.revision} · {form.status==="approved"?"Aprovada": "Rascunho"} · Visível somente ao instrutor.</p>
  {turn>0&&<p>Preparação inicial bloqueada: a simulação já começou.</p>}
  <fieldset disabled={busy||turn>0}>
+ <button onClick={()=>setForm({...form,
+ objective:form.objective||"Conferir informações de um exercício fictício.",
+ situation:form.situation||"Cenário sintético Horizonte, sem localidades reais.",
+ instructions:form.instructions||"Registrar decisões e revisar cada turno.",
+ constraints:form.constraints||"Somente parâmetros inventados.",
+ support:form.support||"Indicadores globais abstratos do jogo.",
+ coordination:form.coordination||"Instrutor revisa e executa.",
+ information:form.information.map(x=>({...x,description:x.description||"Condição sintética a revisar.",source:x.source||"Exemplo do sistema",validity:x.validity||"Turno 0"}))
+ })}>Preencher campos vazios com exemplo fictício</button>
  {fields.map(([key,label])=><label key={key} style={{display:"block"}}>{label}<textarea aria-label={label} maxLength={3000} value={form[key]} onChange={e=>setForm({...form,[key]:e.target.value})}/></label>)}
  <h3>Composição dos meios fictícios</h3>
  {form.units.map((u,i)=><fieldset key={u.id}><legend>Unidade {i+1}</legend>

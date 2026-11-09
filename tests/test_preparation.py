@@ -23,7 +23,7 @@ def test_preparation_persistence_access_revision_and_application(tmp_path,monkey
     assert result.status_code==200,result.text
     assert result.json()["units"][0]["id"]=="nova"
     assert len(result.json()["preparation_history"])==2
-    client.post(f"/api/sessions/{sid}/turns",headers=headers["instrutor"])
+    client.post(f"/api/sessions/{sid}/turns",json={"token":client.get(f"/api/sessions/{sid}/turn-review",headers=headers["instrutor"]).json()["token"]},headers=headers["instrutor"])
     body["revision"]=2
     assert client.post(url,json=body,headers=headers["instrutor"]).status_code==400
 

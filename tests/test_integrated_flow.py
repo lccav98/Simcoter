@@ -1,3 +1,4 @@
+from tests.cycle_helpers import approve_and_review
 """Caminho integrado 0.8 — backend, MPS, EMV, APA e autorização.
 
 Não exige Ollama ou internet. O teste de navegador/MapLibre/WebGL é separado,
@@ -60,7 +61,7 @@ def test_complete_exercise_cycle(tmp_path, monkeypatch):
     assert after == before
 
     # Avanço de turno e EMV usam o mesmo estado persistido.
-    progressed = client.post(f"/api/sessions/{sid}/turns", headers=headers["instrutor"])
+    progressed = client.post(f"/api/sessions/{sid}/turns", json={"token":approve_and_review(client,sid,headers["instrutor"])}, headers=headers["instrutor"])
     assert progressed.status_code == 200
     assert progressed.json()["turn"] == 1
 

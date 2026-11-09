@@ -170,6 +170,53 @@ class GameStore:
             self._save(db, state)
         return state
 
+    def queue_order(self, session_id, unit_id, x, y, authorized):
+        with self._lock, self._connect() as db:
+            state=self._load(db,session_id)
+            if state["turn"]>=20:
+                raise ValueError("Exercício encerrado")
+            if not any(u["id"]==unit_id for u in state["units"]):
+                raise ValueError("Unidade inexistente")
+            state["orders"]=[o for o in state.get("orders",[]) if o["unit_id"]!=unit_id]
+            state["orders"].append({"unit_id":unit_id,"x":x,"y":y,"authorized":authorized})
+            self._save(db,state)
+            return state
+
+    def clear_orders(self,session_id):
+        with self._lock, self._connect() as db:
+            state=self._load(db,session_id)
+            state["orders"]=[]
+            self._save(db,state)
+            return state
+
+    def reviewed_turn(self,session_id,token):
+        from .turn_cycle import review
+        with self._lock, self._connect() as db:
+            state=self._load(db,session_id)
+            assessment=review(state)
+            if assessment["issues"]:
+                raise ValueError("; ".join(assessment["issues"]))
+            if token!=assessment["token"]:
+                raise ValueError("Revisão ausente ou desatualizada. Revise o turno novamente.")
+            orders=state.get("orders",[])
+            for order in orders:
+                unit=next(u for u in state["units"] if u["id"]==order["unit_id"])
+                before={"x":unit["x"],"y":unit["y"]}
+                unit["x"],unit["y"]=order["x"],order["y"]
+                state["events"].append({"kind":"fictitious_move","turn":state["turn"]+1,
+                    "unit_id":unit["id"],"before":before,"after":{"x":unit["x"],"y":unit["y"]},
+                    "cause":"Ordem fictícia revisada pelo instrutor"})
+            turn=state["turn"]+1
+            transition=sample_transition(state["resources"],state["seed"],turn)
+            state["resources"]=transition["resources"]
+            state["units"],events=advance_turn(state["units"],turn)
+            state["events"].extend([transition["event"],*events])
+            state["events"].append({"kind":"turn_reviewed","turn":turn,"order_count":len(orders),"review_token":token})
+            state["turn"]=turn
+            state["orders"]=[]
+            self._save(db,state)
+            return state
+
     def next_turn(self, session_id: str) -> dict:
         with self._lock, self._connect() as db:
             state = self._load(db, session_id)

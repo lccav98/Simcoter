@@ -23,8 +23,20 @@ test("fluxo integrado: criar, MapLibre, EMV, turno e APA", async ({ page }) => {
   }
 
   await page.getByRole("button", { name: "Já salvei as credenciais" }).click();
+  await page.getByRole("button",{name:"Planejamento",exact:true}).click();
+  await page.getByRole("button",{name:"Preencher campos vazios com exemplo fictício"}).click();
+  await page.getByRole("button",{name:"Aprovar e aplicar ao cenário fictício"}).click();
+  await expect(page.getByText(/Revisão 1/)).toBeVisible();
+  await page.getByLabel("X (0–100)", {exact:true}).fill("40");
+  await page.getByLabel("Y (0–100)", {exact:true}).fill("50");
+  await page.getByRole("button",{name:"Verificar disponibilidade"}).click();
+  await page.getByRole("button",{name:"Enfileirar deslocamento fictício"}).click();
+  await page.getByRole("button",{name:"Situação",exact:true}).click();
+  await expect(page.getByText("1 ordens na fila",{exact:false})).toBeVisible();
+  await page.getByRole("button",{name:"Revisar próximo turno"}).click();
   await page.getByRole("button", { name: "Avançar turno" }).click();
   await expect(page.getByText("Turno 1/20")).toBeVisible();
+  await expect(page.getByText("0 ordens na fila",{exact:false})).toBeVisible();
 
   await page.getByRole("button", { name: "Estado-Maior", exact: true }).click();
   await page.getByRole("button", { name: "Solicitar análise" }).click();

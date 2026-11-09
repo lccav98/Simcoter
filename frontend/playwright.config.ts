@@ -7,6 +7,8 @@ const localPython = fileURLToPath(new URL("../.venv/Scripts/python.exe", import.
 
 export default defineConfig({
   testDir: "./e2e",
+  // Limita a carga de navegadores/WebGL na estação Windows.
+  workers: 2,
   timeout: 30000,
   expect: { timeout: 10000 },
   use: {

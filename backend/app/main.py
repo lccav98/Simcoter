@@ -93,9 +93,9 @@ def add_report(session_id: str, body: NewReport, authorization: str | None = Hea
 
 
 @app.post("/api/sessions/{session_id}/turns")
-def next_turn(session_id: str, authorization: str | None = Header(default=None)):
+def next_turn(session_id: str, body: dict = {}, authorization: str | None = Header(default=None)):
     guard(session_id, authorization, instructor=True)
-    return visible_state(call(store.next_turn, session_id), "instrutor")
+    return visible_state(call(store.reviewed_turn, session_id, body.get("token", "")), "instrutor")
 
 
 @app.post("/api/sessions/{session_id}/features/{feature_id}/approve")
@@ -267,6 +267,23 @@ async def document_preview(session_id: str, request: Request, authorization: str
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 
+
+from .turn_cycle import review as review_cycle
+
+@app.get("/api/sessions/{session_id}/turn-review")
+def turn_review(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return review_cycle(call(store.get,session_id))
+
+@app.post("/api/sessions/{session_id}/orders/{unit_id}")
+def queue_order(session_id: str, unit_id: str, body: MovementRequest, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return visible_state(call(store.queue_order,session_id,unit_id,body.x,body.y,body.authorized),"instrutor")
+
+@app.post("/api/sessions/{session_id}/clear-orders")
+def clear_orders(session_id: str, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return visible_state(call(store.clear_orders,session_id),"instrutor")
 
 # Servir o build Vite na mesma origem da API. A montagem só ocorre quando
 # o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
