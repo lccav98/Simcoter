@@ -275,6 +275,13 @@ if (DIST_DIR / "index.html").is_file():
     if (DIST_DIR / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="frontend-assets")
 
+    @app.get("/examples/ordem-sintetica.pdf", include_in_schema=False)
+    def synthetic_order():
+        path = DIST_DIR / "examples" / "ordem-sintetica.pdf"
+        if not path.is_file():
+            raise HTTPException(404, "Exemplo indisponível")
+        return FileResponse(path, media_type="application/pdf", filename="ordem-sintetica.pdf")
+
     @app.get("/", include_in_schema=False)
     def index_page():
         return FileResponse(DIST_DIR / "index.html", headers={"Cache-Control": "no-store"})

@@ -1,10 +1,11 @@
+import PdfPreview from "./PdfPreview";
 import {useState} from "react";
 type PlannedUnit={id:string;name:string;party:"azul"|"vermelha";parent?:string;kind?:string;echelon?:string;x:number;y:number;readiness?:number};
 type Information={category:string;description:string;source:string;validity:string;certainty:string};
 type Document={revision:number;status?:string;gaps?:string[];objective:string;situation:string;instructions:string;constraints:string;support:string;coordination:string;units:PlannedUnit[];information:Information[]};
 const fields=[["objective","Objetivo pedagógico"],["situation","Situação inicial fictícia"],["instructions","Instruções do exercício"],["constraints","Premissas e restrições"],["support","Apoio e recursos abstratos"],["coordination","Coordenação e responsabilidades"]] as const;
 const categories=[["terreno","Terreno"],["clima","Condições meteorológicas"],["adversario","Adversário fictício"],["civis","Condicionantes civis"]];
-export default function Preparation({initial,units,turn,onSave}:{initial?:Document;units:PlannedUnit[];turn:number;onSave:(body:unknown)=>Promise<void>}) {
+export default function Preparation({sessionId,initial,units,turn,onSave}:{sessionId:string;initial?:Document;units:PlannedUnit[];turn:number;onSave:(body:unknown)=>Promise<void>}) {
  const [form,setForm]=useState<Document>(initial??{revision:0,objective:"",situation:"",instructions:"",constraints:"",support:"",coordination:"",
  units:units.map(u=>({...u,parent:u.parent??"",kind:u.kind??"logistics",echelon:u.echelon??"company",readiness:u.readiness??100})),
  information:categories.map(([category])=>({category,description:"",source:"",validity:"",certainty:"lacuna"}))});
@@ -16,7 +17,11 @@ export default function Preparation({initial,units,turn,onSave}:{initial?:Docume
    await onSave({revision:form.revision,objective:form.objective,situation:form.situation,instructions:form.instructions,constraints:form.constraints,support:form.support,coordination:form.coordination,information:form.information,fictional:true,action,units:form.units.map(({id,name,party,parent,kind,echelon,x,y,readiness})=>({id,name,party,parent:parent??"",kind,echelon,x,y,readiness}))});
   } catch(e){setError(String(e))} finally {setBusy(false)}
  }
- return <section className="panel"><h2>Preparar exercício</h2>
+ return <section className="panel"><PdfPreview sessionId={sessionId} locked={turn>0||busy} onTransfer={(field,text)=>{
+   const merged=[form[field],text].filter(Boolean).join("\n\n");
+   if(merged.length>3000)return "O campo excederia 3.000 caracteres. Reduza o trecho ou edite o campo; nada foi substituído.";
+   setForm({...form,[field]:merged,status:"draft"});return undefined;
+ }}/><h2>Preparar exercício</h2>
  <p>Documentação inicial e meios exclusivamente fictícios. Revisão documental, sem análise operacional validada. A aprovação substitui as unidades do cenário antes do primeiro turno.</p>
  <p>Revisão {form.revision} · {form.status==="approved"?"Aprovada": "Rascunho"} · Visível somente ao instrutor.</p>
  {turn>0&&<p>Preparação inicial bloqueada: a simulação já começou.</p>}
