@@ -307,6 +307,8 @@ class GameStore:
         """Deslocamento entre coordenadas fictícias, sem cálculo de rota."""
         with self._lock, self._connect() as db:
             state = self._load(db, session_id)
+            if state["turn"] > 0 or state.get("preparation", {}).get("status") == "approved":
+                raise ValueError("Preparação encerrada: enfileire o deslocamento e revise o próximo turno.")
             unit = next((u for u in state["units"] if u["id"] == unit_id), None)
             if unit is None:
                 raise KeyError("Unidade inexistente")

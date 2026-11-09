@@ -59,7 +59,7 @@ Selecione uma unidade, informe X e Y e clique em **Verificar disponibilidade**. 
 
 Se permitido, clique em **Enfileirar deslocamento fictício**. A unidade permanece na posição atual até o turno ser executado. Uma nova ordem para a mesma unidade substitui seu destino anterior na fila. É possível dar ordens a várias unidades. A validação examina somente o destino: não calcula caminho, distância percorrida, velocidade, obstáculos intermediários ou duração.
 
-As áreas abstratas de restrição não são inferidas do mapa geográfico. A API administrativa antiga de deslocamento imediato permanece disponível para compatibilidade; a interface utiliza a fila revisada. Alterações administrativas posteriores invalidam a revisão do turno.
+As áreas abstratas de restrição não são inferidas do mapa geográfico. A API administrativa antiga de deslocamento imediato só permite posicionamento no turno zero, antes da aprovação da preparação. Depois disso, todo deslocamento deve passar pela fila e revisão do turno, inclusive chamadas diretas à API. Alterações administrativas posteriores invalidam a revisão do turno.
 
 ## 5. Situação — revisar e executar um turno
 

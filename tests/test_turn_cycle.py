@@ -1,6 +1,21 @@
 from tests.test_api import setup_session
 from tests.cycle_helpers import approve_and_review
 
+def test_immediate_movement_cannot_bypass_review(tmp_path, monkeypatch):
+    c, sid, h = setup_session(tmp_path, monkeypatch)
+    auth = h["instrutor"]
+    url = f"/api/sessions/{sid}"
+    token = approve_and_review(c, sid, auth)
+    for expected_turn in (0, 1):
+        before = c.get(url, headers=auth).json()
+        assert before["turn"] == expected_turn
+        rejected = c.post(url + "/units/azul-1/movement", headers=auth,
+                          json={"x":40, "y":50, "authorized":True})
+        assert rejected.status_code == 400
+        assert c.get(url, headers=auth).json() == before
+        if expected_turn == 0:
+            assert c.post(url + "/turns", headers=auth, json={"token":token}).status_code == 200
+
 def test_cycle_gates_and_duplicate(tmp_path,monkeypatch):
     c,sid,h=setup_session(tmp_path,monkeypatch);auth=h["instrutor"];url=f"/api/sessions/{sid}"
     assert c.post(url+"/turns",json={},headers=auth).status_code==400
