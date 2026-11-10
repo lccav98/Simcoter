@@ -170,6 +170,16 @@ class GameStore:
             self._save(db, state)
         return state
 
+    def set_document_area(self, session_id, area):
+        with self._lock, self._connect() as db:
+            state = self._load(db, session_id)
+            if state["turn"] != 0:
+                raise ValueError("Área documental só pode ser definida no turno zero.")
+            state["document_area"] = area
+            state["events"].append({"kind":"document_area_confirmed", "turn":0, "area":area})
+            self._save(db, state)
+        return state
+
     def queue_order(self, session_id, unit_id, x, y, authorized):
         with self._lock, self._connect() as db:
             state=self._load(db,session_id)

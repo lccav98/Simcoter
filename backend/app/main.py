@@ -285,6 +285,21 @@ def clear_orders(session_id: str, authorization: str | None = Header(default=Non
     guard(session_id, authorization, instructor=True)
     return visible_state(call(store.clear_orders,session_id),"instrutor")
 
+from .document_area import AreaDocument, propose
+
+@app.post("/api/sessions/{session_id}/document-area/propose")
+def propose_document_area(session_id: str, body: AreaDocument, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    return call(propose, body)
+
+@app.post("/api/sessions/{session_id}/document-area/confirm")
+def confirm_document_area(session_id: str, body: AreaDocument, authorization: str | None = Header(default=None)):
+    guard(session_id, authorization, instructor=True)
+    result = call(propose, body)
+    if len(result["candidates"]) != 1:
+        raise HTTPException(400, "Selecione exatamente uma referência explícita.")
+    return visible_state(call(store.set_document_area, session_id, result["candidates"][0]), "instrutor")
+
 # Servir o build Vite na mesma origem da API. A montagem só ocorre quando
 # o frontend já foi compilado; desenvolvimento continua com Vite na porta 5173.
 DIST_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"

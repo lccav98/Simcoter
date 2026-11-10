@@ -12,7 +12,7 @@ import {
 type Measure = {id:string;name:string;kind:string;status:"proposed"|"approved"};
 type TerrainZone = {id:string;label:string;grade:"restritivo"|"impeditivo";bounds:{x_min:number;x_max:number;y_min:number;y_max:number}};
 export type EnvironmentData = {weather:"normal"|"adverse"|"severe";weather_label:string;zones:TerrainZone[];version:string};
-type Props = {allowImport?:boolean;units:SimUnit[];features:Measure[];environment?:EnvironmentData|null};
+type Props = {area?:{bounds:[number,number,number,number]};allowImport?:boolean;units:SimUnit[];features:Measure[];environment?:EnvironmentData|null};
 type Filters = {parties:Record<Party,boolean>;kinds:Record<UnitKind,boolean>;overlays:boolean;terrain:boolean};
 const ANCHOR:[number,number]=[-47.9292,-15.7801];
 const INITIAL_FILTERS:Filters = {
@@ -50,7 +50,7 @@ function overlays(features:Measure[],show:boolean) {
   };
 }
 
-export default function MapView({units,features,environment,allowImport=false}:Props) {
+export default function MapView({area,units,features,environment,allowImport=false}:Props) {
   const container=useRef<HTMLDivElement|null>(null);
   const mapRef=useRef<maplibregl.Map|null>(null);
   const markers=useRef<maplibregl.Marker[]>([]);
@@ -60,6 +60,14 @@ export default function MapView({units,features,environment,allowImport=false}:P
   const [error,setError]=useState("");
   const [pack,setPack]=useState<LocalPack|null>(null);
   const [mapReady,setMapReady]=useState(false);
+  useEffect(()=>{
+    const map=mapRef.current;if(!mapReady||!map||!area)return;
+    const [w,s,e,n]=area.bounds;
+    const geometry={type:"Feature" as const,properties:{},geometry:{type:"Polygon" as const,coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]]}};
+    if(map.getSource('document-area'))(map.getSource('document-area') as maplibregl.GeoJSONSource).setData(geometry);
+    else {map.addSource('document-area',{type:'geojson',data:geometry});map.addLayer({id:'document-area-border',type:'line',source:'document-area',paint:{'line-color':'#e56f21','line-width':3}})}
+    map.fitBounds([[w,s],[e,n]],{padding:40,duration:0});
+  },[area,mapReady]);
   async function importPack(file?:File) {
     if(!file)return;
     try {
